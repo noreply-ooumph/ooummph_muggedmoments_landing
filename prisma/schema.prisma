@@ -1,0 +1,724 @@
+// MuggedMoments — Prisma Schema
+// Database: PostgreSQL
+// ORM: Prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// EVENT CATALOG
+// ============================================================
+
+model EventType {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  name      String
+  active    Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  leads     Lead[]
+  questions Question[]
+
+  @@map("event_types")
+}
+
+// ============================================================
+// SERVICE CATALOG
+// ============================================================
+
+model Service {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  name      String
+  active    Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  vendorServices VendorService[]
+
+  @@map("services")
+}
+
+// ============================================================
+// DYNAMIC QUESTION CATALOG
+// ============================================================
+
+model Question {
+  id               String   @id @default(uuid())
+  questionKey      String   @unique @map("question_key")
+  eventTypeId      String?  @map("event_type_id")
+  label            String
+  fieldType        String   @map("field_type") // text | select | multiselect | date | number | phone | checkbox
+  required         Boolean  @default(false)
+  options          Json? // Array of { value, label } for select/multiselect
+  displayCondition Json?    @map("display_condition") // { field, operator, value }
+  validationRule   Json?    @map("validation_rule") // { type, params }
+  order            Int      @default(0)
+  active           Boolean  @default(true)
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  eventType EventType? @relation(fields: [eventTypeId], references: [id])
+
+  @@index([eventTypeId])
+  @@map("questions")
+}
+
+// ============================================================
+// LEAD
+// ============================================================
+
+model Lead {
+  id              String    @id @default(uuid())
+  publicLeadId    String    @unique @map("public_lead_id") // MM-XXXXXXXX
+  idempotencyKey  String?   @unique @map("idempotency_key")
+  eventTypeId     String    @map("event_type_id")
+  // Customer-typed event name — set only when eventTypeId resolves to the
+  // "other" EventType row, since that catalog entry has no fixed name capable
+  // of describing an arbitrary custom event (e.g. "Baby Shower", "Anniversary").
+  // Null for every other event type. See schemas.ts's requireCustomEventTypeNameWhenOther.
+  customEventTypeName String? @map("custom_event_type_name")
+  city            String
+  // Free-text locality/area within the city (e.g. "Gomti Nagar") — optional,
+  // customer-submitted. Informational only: NOT a matching dimension (see
+  // matching-rules.ts) — this app's existing Vendor.serviceAreas field is also
+  // free text with no canonical-list validation, and using this to hard-filter
+  // vendors would risk wrongly excluding a real match over a spelling/spacing
+  // mismatch. Captured for vendor/admin context only, same posture as budget.
+  locality        String?
+  eventDate       DateTime? @map("event_date")
+  guestCount      Int?      @map("guest_count")
+  budget          String? // Budget tier slug — CONFIGURATION_REQUIRED
+  services        String[] // Array of service slugs
+  customerName    String    @map("customer_name")
+  phone           String
+  whatsappConsent Boolean   @default(false) @map("whatsapp_consent")
+  emailOptIn      Boolean   @default(false) @map("email_opt_in")
+  smsOptIn        Boolean   @default(false) @map("sms_opt_in")
+  dynamicAnswers  Json?     @map("dynamic_answers") // { [questionKey]: answer } — see Question model
+
+  // Lifecycle
+  status             LeadStatus         @default(SUBMITTED)
+  completenessStatus CompletenessStatus @default(PENDING) @map("completeness_status")
+  score              Float?
+  scoreVersion       String?            @map("score_version")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  eventType     EventType             @relation(fields: [eventTypeId], references: [id])
+  attribution   LeadAttribution?
+  events        LeadEvent[]
+  leadScore     LeadScore?
+  matches       LeadVendorMatch[]
+  automations   AutomationExecution[]
+  qualification LeadQualification?
+  opportunities VendorOpportunity[]
+
+  @@index([publicLeadId])
+  @@index([eventTypeId])
+  @@index([city])
+  @@index([eventDate])
+  @@index([status])
+  @@index([createdAt])
+  @@map("leads")
+}
+
+// ============================================================
+// LEAD QUALIFICATION (Stage 9 — Qualification State Machine)
+// ============================================================
+
+enum QualificationStatus {
+  CAPTURED
+  INCOMPLETE
+  QUALIFICATION_PENDING
+  COMPLETE
+  QUALIFIED
+  MATCHING
+  ROUTED
+}
+
+model LeadQualification {
+  id            String              @id @default(uuid())
+  leadId        String              @unique @map("lead_id")
+  status        QualificationStatus
+  missingFields String[]            @map("missing_fields")
+  createdAt     DateTime            @default(now()) @map("created_at")
+  updatedAt     DateTime            @updatedAt @map("updated_at")
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@map("lead_qualifications")
+}
+
+enum LeadStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  MATCHED
+  CLOSED
+  INVALID
+}
+
+enum CompletenessStatus {
+  PENDING
+  COMPLETE
+  INCOMPLETE
+}
+
+// ============================================================
+// LEAD ATTRIBUTION
+// ============================================================
+
+model LeadAttribution {
+  id          String   @id @default(uuid())
+  leadId      String   @unique @map("lead_id")
+  utmSource   String?  @map("utm_source")
+  utmMedium   String?  @map("utm_medium")
+  utmCampaign String?  @map("utm_campaign")
+  utmContent  String?  @map("utm_content")
+  utmTerm     String?  @map("utm_term")
+  landingPath String?  @map("landing_path")
+  capturedAt  DateTime @default(now()) @map("captured_at")
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@map("lead_attributions")
+}
+
+// ============================================================
+// LEAD LIFECYCLE EVENTS
+// ============================================================
+
+model LeadEvent {
+  id        String   @id @default(uuid())
+  leadId    String   @map("lead_id")
+  eventType String   @map("event_type") // LEAD_CREATED, COMPLETENESS_CALCULATED, etc.
+  metadata  Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId])
+  @@map("lead_events")
+}
+
+// ============================================================
+// LEAD SCORE
+// ============================================================
+
+model LeadScore {
+  id           String   @id @default(uuid())
+  leadId       String   @unique @map("lead_id")
+  score        Float
+  matchedRules Json     @map("matched_rules") // Array of { ruleId, weight, reason }
+  scoreVersion String   @map("score_version")
+  calculatedAt DateTime @default(now()) @map("calculated_at")
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@map("lead_scores")
+}
+
+// ============================================================
+// VENDOR
+// ============================================================
+
+model Vendor {
+  id                 String                   @id @default(uuid())
+  name               String
+  city               String
+  // Unique because it now doubles as the phone-OTP login identity (Vendor Auth).
+  // Safe to make unique: no seeded vendor sets this today (all NULL), and Postgres
+  // allows multiple NULLs under a unique constraint.
+  contactPhone       String?                  @unique @map("contact_phone")
+  profileComplete    Boolean                  @default(false) @map("profile_complete")
+  active             Boolean                  @default(true)
+  verificationStatus VendorVerificationStatus @default(PENDING) @map("verification_status")
+  // DEVELOPMENT ONLY — flag seed vendors so they are never treated as real
+  isDevelopmentSeed  Boolean                  @default(false) @map("is_development_seed")
+  createdAt          DateTime                 @default(now()) @map("created_at")
+  updatedAt          DateTime                 @updatedAt @map("updated_at")
+
+  // Stage 16, Phase 1 — vendor-editable profile fields
+  about         String?  @db.Text
+  startingPrice Int?     @map("starting_price") // in INR, whole rupees — no currency logic, no formatting decisions made here
+  serviceAreas  String[] @default([]) @map("service_areas") // free-text city/area names; CONFIGURATION_REQUIRED: no validation against a canonical city list exists yet
+  // ^ default made explicit here after a migration in this session (add_vendor_attribution)
+  // unintentionally dropped an undocumented DB-level default that vendor registration relied
+  // on implicitly (it never sets serviceAreas on create) — this restores it as a real,
+  // declared schema default instead of undocumented DB drift.
+
+  services       VendorService[]
+  availability   VendorAvailability[]
+  matches        LeadVendorMatch[]
+  sessions       VendorSession[]
+  portfolioItems VendorPortfolioItem[]
+  documents      VendorDocument[]
+  opportunities  VendorOpportunity[]
+  bookings       Booking[]
+  attribution    VendorAttribution?
+
+  @@index([city])
+  @@index([active])
+  @@map("vendors")
+}
+
+// Mirrors LeadAttribution's exact field set and one-to-one relation pattern.
+// Nullable/optional throughout, additive migration — existing vendor rows
+// (registered before this model existed) simply have no attribution row,
+// which is the honest state; never backfilled or fabricated.
+model VendorAttribution {
+  id          String   @id @default(uuid())
+  vendorId    String   @unique @map("vendor_id")
+  utmSource   String?  @map("utm_source")
+  utmMedium   String?  @map("utm_medium")
+  utmCampaign String?  @map("utm_campaign")
+  utmContent  String?  @map("utm_content")
+  utmTerm     String?  @map("utm_term")
+  landingPath String?  @map("landing_path")
+  capturedAt  DateTime @default(now()) @map("captured_at")
+
+  vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@map("vendor_attributions")
+}
+
+// ============================================================
+// VENDOR PORTFOLIO (Stage 16, Phase 2)
+// ============================================================
+
+model VendorPortfolioItem {
+  id       String @id @default(uuid())
+  vendorId String @map("vendor_id")
+  // Relative public path, e.g. "/uploads/vendor-portfolio/<vendorId>/<uuid>.jpg" —
+  // servable directly by Next.js static file serving under /public. Not an absolute
+  // filesystem path, never a full URL with host (host-agnostic on purpose).
+  imagePath String   @map("image_path")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@index([vendorId])
+  @@map("vendor_portfolio_items")
+}
+
+// ============================================================
+// VENDOR DOCUMENTS / BROCHURE
+// ============================================================
+
+model VendorDocument {
+  id       String @id @default(uuid())
+  vendorId String @map("vendor_id")
+  // Relative public path, e.g. "/uploads/vendor-documents/<vendorId>/<uuid>.pdf" —
+  // servable directly by Next.js static file serving under /public, same convention
+  // as VendorPortfolioItem.imagePath. Never an absolute filesystem path or a full
+  // URL with host.
+  filePath String @map("file_path")
+  // Display-only — never used to build filePath or trusted as a content-type
+  // (see documentService.ts::sanitizeOriginalFilename).
+  originalFilename String   @map("original_filename")
+  fileSizeBytes    Int      @map("file_size_bytes")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@index([vendorId])
+  @@map("vendor_documents")
+}
+
+enum VendorVerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+// ============================================================
+// VENDOR AUTHENTICATION (Stage 16 prerequisite)
+// ============================================================
+
+model VendorOtpCode {
+  id         String    @id @default(uuid())
+  phone      String
+  code       String
+  expiresAt  DateTime  @map("expires_at")
+  consumedAt DateTime? @map("consumed_at")
+  attempts   Int       @default(0)
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  @@index([phone])
+  @@map("vendor_otp_codes")
+}
+
+model VendorSession {
+  id        String   @id @default(uuid())
+  vendorId  String   @map("vendor_id")
+  tokenHash String   @unique @map("token_hash")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@index([vendorId])
+  @@map("vendor_sessions")
+}
+
+// ============================================================
+// VENDOR SERVICE CAPABILITIES
+// ============================================================
+
+model VendorService {
+  id         String   @id @default(uuid())
+  vendorId   String   @map("vendor_id")
+  serviceId  String   @map("service_id")
+  eventTypes String[] @map("event_types") // slugs of supported event types
+
+  vendor  Vendor  @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  service Service @relation(fields: [serviceId], references: [id])
+
+  @@unique([vendorId, serviceId])
+  @@map("vendor_services")
+}
+
+// ============================================================
+// VENDOR AVAILABILITY
+// ============================================================
+
+model VendorAvailability {
+  id        String             @id @default(uuid())
+  vendorId  String             @map("vendor_id")
+  date      DateTime
+  status    AvailabilityStatus @default(UNKNOWN)
+  source    String? // who/what set this status
+  updatedAt DateTime           @updatedAt @map("updated_at")
+
+  vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@unique([vendorId, date])
+  @@index([vendorId])
+  @@index([date])
+  @@map("vendor_availability")
+}
+
+enum AvailabilityStatus {
+  AVAILABLE
+  UNAVAILABLE
+  UNKNOWN
+}
+
+// ============================================================
+// LEAD VENDOR MATCH
+// ============================================================
+
+model LeadVendorMatch {
+  id           String             @id @default(uuid())
+  leadId       String             @map("lead_id")
+  vendorId     String             @map("vendor_id")
+  eligible     Boolean
+  reasons      String[] // e.g. ["CITY_MATCH", "SERVICE_MATCH"]
+  availability AvailabilityStatus @default(UNKNOWN)
+  matchedAt    DateTime           @default(now()) @map("matched_at")
+
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  vendor Vendor @relation(fields: [vendorId], references: [id])
+
+  @@unique([leadId, vendorId])
+  @@index([leadId])
+  @@map("lead_vendor_matches")
+}
+
+// ============================================================
+// VENDOR OPPORTUNITY (Stage 18, Phase 18.0)
+// ============================================================
+
+enum VendorOpportunityStatus {
+  CREATED
+  SENT
+  VIEWED
+  INTERESTED
+  DECLINED
+  QUOTE_PENDING
+  QUOTE_SUBMITTED
+}
+
+model VendorOpportunity {
+  id       String                  @id @default(uuid())
+  leadId   String                  @map("lead_id")
+  vendorId String                  @map("vendor_id")
+  status   VendorOpportunityStatus @default(CREATED)
+  // Deadline computed once at creation (createdAt + 48h, see opportunityService.ts).
+  // No scheduler ever writes to this row when it passes — expiry is a read-time
+  // derived fact (isExpired()), not a stored transition.
+  responseDeadline DateTime  @map("response_deadline")
+  viewedAt         DateTime? @map("viewed_at")
+  respondedAt      DateTime? @map("responded_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  lead            Lead                 @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  vendor          Vendor               @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  quote           Quote?
+  bookingRequests BookingRequest[]
+
+  @@unique([leadId, vendorId])
+  @@index([vendorId])
+  @@index([leadId])
+  @@map("vendor_opportunities")
+}
+
+// ============================================================
+// VENDOR QUOTE (Stage 18, Phase 18.1)
+// ============================================================
+
+enum QuoteStatus {
+  DRAFT
+  SUBMITTED
+}
+
+enum QuoteAvailabilityState {
+  AVAILABLE
+  PENDING_CONFIRMATION
+  UNAVAILABLE
+  UNKNOWN
+}
+
+model Quote {
+  id            String   @id @default(uuid())
+  opportunityId String   @unique @map("opportunity_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  opportunity VendorOpportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  versions    QuoteVersion[]
+  messages    QuoteMessage[]
+
+  @@map("quotes")
+}
+
+// ============================================================
+// QUOTE Q&A MESSAGING (Stage 18, Phase 18.5)
+// ============================================================
+
+enum MessageSenderType {
+  CUSTOMER
+  VENDOR
+}
+
+model QuoteMessage {
+  id         String            @id @default(uuid())
+  quoteId    String            @map("quote_id")
+  senderType MessageSenderType @map("sender_type")
+  body       String            @db.Text
+  createdAt  DateTime          @default(now()) @map("created_at")
+
+  quote Quote @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+
+  @@index([quoteId])
+  @@map("quote_messages")
+}
+
+// ============================================================
+// BOOKING REQUEST (Stage 19, Phase 19.0)
+// ============================================================
+
+enum BookingRequestStatus {
+  REQUESTED
+  UNDER_REVIEW
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+model BookingRequest {
+  id               String               @id @default(uuid())
+  idempotencyKey   String               @unique @map("idempotency_key")
+  opportunityId    String               @map("opportunity_id")
+  quoteVersionId   String               @map("quote_version_id")
+  status           BookingRequestStatus @default(REQUESTED)
+  responseDeadline DateTime             @map("response_deadline")
+  rejectionReason  String?              @map("rejection_reason")
+  respondedAt      DateTime?            @map("responded_at")
+  createdAt        DateTime             @default(now()) @map("created_at")
+
+  opportunity  VendorOpportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  quoteVersion QuoteVersion      @relation(fields: [quoteVersionId], references: [id])
+  booking      Booking?
+
+  @@index([opportunityId])
+  @@index([quoteVersionId])
+  @@map("booking_requests")
+}
+
+// ============================================================
+// BOOKING + BOOKING STATUS HISTORY (Stage 19, Phase 19.1)
+// ============================================================
+
+enum CancelledByActor {
+  CUSTOMER
+  VENDOR
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+model Booking {
+  id                String        @id @default(uuid())
+  // Stage 19, Phase 19.7.3 — customer/vendor-facing display ID, distinct
+  // prefix (BK-) from Lead's public ID (MM-) so the two never get confused
+  // when shown on the same page.
+  publicBookingId   String        @unique @map("public_booking_id")
+  bookingRequestId  String        @unique @map("booking_request_id")
+  vendorId          String        @map("vendor_id")
+  // Normalized to midnight UTC — same convention as VendorAvailability.date
+  // (see availabilityService.ts::checkVendorAvailability). Stored directly
+  // (not derived) because it is an immutable historical fact of what date
+  // this booking is for, not a piece of current mutable state.
+  date              DateTime
+  status            BookingStatus @default(CONFIRMED)
+  // Stage 19, Phase 19.5 — set only on cancellation. Which party cancelled is
+  // a durable fact about this booking, not a piece of derivable current state.
+  cancelledBy       CancelledByActor? @map("cancelled_by")
+  createdAt         DateTime      @default(now()) @map("created_at")
+
+  bookingRequest BookingRequest         @relation(fields: [bookingRequestId], references: [id])
+  vendor         Vendor                 @relation(fields: [vendorId], references: [id])
+  statusHistory  BookingStatusHistory[]
+
+  @@index([vendorId])
+  @@map("bookings")
+}
+
+model BookingStatusHistory {
+  id        String        @id @default(uuid())
+  bookingId String        @map("booking_id")
+  status    BookingStatus
+  note      String?
+  createdAt DateTime      @default(now()) @map("created_at")
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId])
+  @@map("booking_status_history")
+}
+
+// Stage 18, Phase 18.4 — versioned quote snapshot. "Current version" is always
+// derived (highest versionNumber with status: SUBMITTED — see quoteVersionService.ts),
+// never stored as a pointer column.
+model QuoteVersion {
+  id                String                 @id @default(uuid())
+  quoteId           String                 @map("quote_id")
+  versionNumber     Int                    @map("version_number")
+  status            QuoteStatus            @default(DRAFT)
+  availabilityState QuoteAvailabilityState @default(UNKNOWN) @map("availability_state")
+  validUntil        DateTime?              @map("valid_until")
+  notes             String?                @db.Text
+  included          String[]               @default([])
+  excluded          String[]               @default([])
+  submittedAt       DateTime?              @map("submitted_at")
+  createdAt         DateTime               @default(now()) @map("created_at")
+  updatedAt         DateTime               @updatedAt @map("updated_at")
+
+  quote           Quote            @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  lineItems       QuoteLineItem[]
+  bookingRequests BookingRequest[]
+
+  @@unique([quoteId, versionNumber])
+  @@index([quoteId])
+  @@map("quote_versions")
+}
+
+model QuoteLineItem {
+  id             String @id @default(uuid())
+  quoteVersionId String @map("quote_version_id")
+  label          String
+  amount         Int // INR, whole rupees — same convention as Vendor.startingPrice
+  order          Int    @default(0)
+
+  quoteVersion QuoteVersion @relation(fields: [quoteVersionId], references: [id], onDelete: Cascade)
+
+  @@index([quoteVersionId])
+  @@map("quote_line_items")
+}
+
+// ============================================================
+// AUTOMATION EXECUTION
+// ============================================================
+
+model AutomationExecution {
+  id             String           @id @default(uuid())
+  leadId         String           @map("lead_id")
+  automationType String           @map("automation_type")
+  executionKey   String           @unique @map("execution_key") // lead_id + automation_type + version
+  status         AutomationStatus @default(PENDING)
+  startedAt      DateTime?        @map("started_at")
+  completedAt    DateTime?        @map("completed_at")
+  errorCode      String?          @map("error_code")
+  errorMessage   String?          @map("error_message")
+  metadata       Json?
+  createdAt      DateTime         @default(now()) @map("created_at")
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId])
+  @@index([automationType])
+  @@map("automation_executions")
+}
+
+enum AutomationStatus {
+  PENDING
+  RUNNING
+  SUCCEEDED
+  FAILED
+  SKIPPED
+}
+
+// ============================================================
+// AUDIT LOG
+// ============================================================
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  entityType String   @map("entity_type") // Lead, Vendor, etc.
+  // No FK: entityId is a generic polymorphic reference (Lead, Vendor, VendorOtpCode, etc.),
+  // keyed alongside entityType above — previously mistakenly FK'd to Lead only, which
+  // silently broke every non-Lead audit write (see Stage 16 Phase 0 vendor auth fix).
+  entityId   String   @map("entity_id")
+  action     String // LEAD_CREATED, SCORE_CALCULATED, etc.
+  actorType  String   @default("SYSTEM") @map("actor_type")
+  metadata   Json?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([entityType, entityId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// ============================================================
+// ANALYTICS EVENT (Stage 14 — Intelligence & Optimization)
+// ============================================================
+
+model AnalyticsEvent {
+  id          String   @id @default(uuid())
+  event       String
+  properties  Json?
+  // Deliberately NOT a Prisma relation: most events (e.g. page_view) fire before any
+  // Lead exists, so a hard foreign key would be wrong here — this is a loose reference.
+  leadId      String?  @map("lead_id")
+  anonymousId String?  @map("anonymous_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([event])
+  @@index([leadId])
+  @@index([createdAt])
+  @@map("analytics_events")
+}
