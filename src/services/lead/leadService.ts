@@ -1617,6 +1617,21 @@ export async function backfillOpportunitiesForNewVendor(vendor: {
       ? await checkVendorAvailability(vendor.id, lead.eventDate)
       : "UNKNOWN";
 
+    // Mirrors the at-creation pipeline's own post-matching call (Automation 3,
+    // above) — QUALIFIED -> ROUTED once at least one eligible vendor exists.
+    // This was the missing piece of the backfill path: it wrote a real,
+    // eligible LeadVendorMatch row but never advanced qualification, so a lead
+    // whose only eligible vendor arrived via backfill (registered after the
+    // lead was submitted, as opposed to being eligible at creation time) stayed
+    // stuck reporting "still looking for a match" to the customer forever —
+    // even after that vendor opened the opportunity and marked Interested.
+    // Safe no-op for a lead that isn't currently QUALIFIED (already ROUTED,
+    // still INCOMPLETE, etc.) — same guarantee transitionQualification always
+    // provides, re-derived fresh from the stored status on every call.
+    await transitionQualification(lead.id, {
+      eligibleMatchCount: eligible ? 1 : 0,
+    });
+
     await prisma.leadVendorMatch.upsert({
       where: { leadId_vendorId: { leadId: lead.id, vendorId: vendor.id } },
       create: { leadId: lead.id, vendorId: vendor.id, eligible, reasons, availability },
