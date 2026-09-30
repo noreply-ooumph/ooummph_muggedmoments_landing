@@ -19,6 +19,11 @@ import { getLeadTimeline } from "@/domain/analytics/funnelService";
 import { getLeadDetailForAdmin } from "@/services/lead/leadService";
 import { AdminLeadDetailCard } from "./AdminLeadDetailCard";
 
+// Same reasoning as /admin/leads/page.tsx — forced dynamic so this always
+// reflects the lead's current status/timeline rather than whatever it looked
+// like the first time this exact URL was rendered.
+export const dynamic = "force-dynamic";
+
 export default async function AdminLeadDetailPage({
   params,
 }: {

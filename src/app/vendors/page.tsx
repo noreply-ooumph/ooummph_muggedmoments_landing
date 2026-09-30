@@ -26,6 +26,15 @@ import { PublicSiteHeader } from "@/components/public/PublicSiteHeader";
 import { VendorAvatarPlaceholder } from "@/components/public/VendorAvatarPlaceholder";
 import prisma from "@/lib/db/prisma";
 
+// No fetch() calls and no Request-time API usage here — only a direct Prisma
+// read. Left at the default `dynamic = "auto"`, Next.js would prerender this
+// as a static build-time snapshot and freeze the vendor list at whatever it
+// was when the app was last built (verified live: this exact bug on
+// /admin/leads, same root cause). This page is the public "Explore Vendors"
+// directory — every newly verified vendor must appear here without a
+// redeploy, so it's forced dynamic.
+export const dynamic = "force-dynamic";
+
 export default async function VendorDirectoryPage() {
   const vendors = await prisma.vendor.findMany({
     where: { active: true, verificationStatus: "VERIFIED" },

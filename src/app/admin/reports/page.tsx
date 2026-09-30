@@ -19,6 +19,12 @@ import {
   computeVendorResponseReport,
 } from "@/domain/analytics/funnelService";
 
+// Same reasoning as /admin/leads/page.tsx: no fetch(), no Request-time API,
+// only direct Prisma reads — with no dynamic signal Next.js would prerender
+// this as a static build-time snapshot instead of a live report. Forced
+// dynamic so every view reflects the current DB state.
+export const dynamic = "force-dynamic";
+
 export default async function AdminReportsPage() {
   const range = { from: new Date(0), to: new Date() };
   const [funnel, vendorResponse] = await Promise.all([

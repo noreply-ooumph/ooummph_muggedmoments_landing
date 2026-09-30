@@ -12,6 +12,11 @@ import { notFound } from "next/navigation";
 import prisma from "@/lib/db/prisma";
 import { getVendorTimeline } from "@/domain/vendorProfile/adminVendorService";
 
+// Same reasoning as /admin/leads/page.tsx — forced dynamic so this always
+// reflects the vendor's current status/timeline rather than whatever it
+// looked like the first time this exact URL was rendered.
+export const dynamic = "force-dynamic";
+
 export default async function AdminVendorDetailPage({
   params,
 }: {

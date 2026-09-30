@@ -12,6 +12,15 @@
 import Link from "next/link";
 import { listLeadsForAdmin } from "@/services/lead/leadService";
 
+// This page has zero fetch() calls and reads no Request-time API (cookies/
+// headers/searchParams) — only a direct Prisma read. With no dynamic signal
+// at all, Next.js's default `dynamic = "auto"` prerenders it as fully static
+// at build time and serves that frozen snapshot forever after (verified live:
+// a real production lead existed in the DB while this page kept showing 0,
+// because the build ran before that row existed). An admin ops view must
+// always reflect the current DB state, so this route is forced dynamic.
+export const dynamic = "force-dynamic";
+
 export default async function AdminLeadsPage() {
   const leads = await listLeadsForAdmin();
 
