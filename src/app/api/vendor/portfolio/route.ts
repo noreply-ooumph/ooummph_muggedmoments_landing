@@ -2,17 +2,19 @@
  * MuggedMoments — POST /api/vendor/portfolio (Stage 16, Phase 2)
  *
  * Uploads one portfolio image via native Next.js formData() — no upload library.
- * Local disk storage under public/uploads/vendor-portfolio/<vendorId>/ — a known,
- * documented limitation: this does not survive redeploys on ephemeral filesystems.
+ * Storage goes through fileStorage (src/lib/fileStorage) — Vercel Blob when
+ * BLOB_READ_WRITE_TOKEN is set, local disk otherwise. Confirmed live in
+ * production: local disk alone does not survive Vercel's read-only runtime
+ * filesystem — a real vendor's upload failed with a generic 500 until this
+ * moved to fileStorage.
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { mkdir, writeFile, unlink } from "fs/promises";
-import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import { getVendorSession } from "@/lib/vendorSession";
 import { createAuditLog } from "@/domain/audit/auditService";
 import { toApiErrorResponse } from "@/lib/errors";
+import { fileStorage } from "@/lib/fileStorage";
 import {
   isAllowedPortfolioMimeType,
   isWithinPortfolioFileSizeLimit,
@@ -80,19 +82,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 
   const fileId = uuidv4();
-  const imagePath = buildPortfolioImagePath(session.vendorId, fileId, file.type);
-  const absoluteDir = path.join(process.cwd(), "public", "uploads", "vendor-portfolio", session.vendorId);
-  const absoluteFilePath = path.join(process.cwd(), "public", imagePath.replace(/^\//, ""));
+  const relativePath = buildPortfolioImagePath(session.vendorId, fileId, file.type);
 
-  let fileWritten = false;
+  let uploadedPath: string | null = null;
   try {
-    await mkdir(absoluteDir, { recursive: true });
     const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(absoluteFilePath, buffer);
-    fileWritten = true;
+    uploadedPath = await fileStorage.upload({
+      buffer,
+      relativePath,
+      contentType: file.type,
+    });
 
     const item = await prisma.vendorPortfolioItem.create({
-      data: { vendorId: session.vendorId, imagePath },
+      data: { vendorId: session.vendorId, imagePath: uploadedPath },
     });
 
     await createAuditLog({
@@ -106,10 +108,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       { status: 201 }
     );
   } catch (error) {
-    if (fileWritten) {
+    if (uploadedPath) {
       try {
-        await unlink(absoluteFilePath);
-      } catch (cleanupError) {
+        await fileStorage.delete(uploadedPath);
+      } catch {
         logger.warn("Failed to clean up orphaned portfolio file after DB write failure", {
           operation: "POST /api/vendor/portfolio",
           errorCode: "PORTFOLIO_CLEANUP_FAILED",

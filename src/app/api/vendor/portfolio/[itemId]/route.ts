@@ -7,10 +7,9 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { unlink } from "fs/promises";
-import path from "path";
 import { getVendorSession } from "@/lib/vendorSession";
 import { createAuditLog } from "@/domain/audit/auditService";
+import { fileStorage } from "@/lib/fileStorage";
 import prisma from "@/lib/db/prisma";
 import { logger } from "@/lib/logger";
 
@@ -40,10 +39,9 @@ export async function DELETE(
   await prisma.vendorPortfolioItem.delete({ where: { id: item.id } });
 
   try {
-    const absoluteFilePath = path.join(process.cwd(), "public", item.imagePath.replace(/^\//, ""));
-    await unlink(absoluteFilePath);
-  } catch (error) {
-    logger.warn("Failed to delete portfolio file from disk (DB row already removed)", {
+    await fileStorage.delete(item.imagePath);
+  } catch {
+    logger.warn("Failed to delete portfolio file from storage (DB row already removed)", {
       operation: "DELETE /api/vendor/portfolio/[itemId]",
       errorCode: "PORTFOLIO_FILE_DELETE_FAILED",
     });

@@ -8,10 +8,9 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { unlink } from "fs/promises";
-import path from "path";
 import { getVendorSession } from "@/lib/vendorSession";
 import { createAuditLog } from "@/domain/audit/auditService";
+import { fileStorage } from "@/lib/fileStorage";
 import prisma from "@/lib/db/prisma";
 import { logger } from "@/lib/logger";
 
@@ -41,10 +40,9 @@ export async function DELETE(
   await prisma.vendorDocument.delete({ where: { id: document.id } });
 
   try {
-    const absoluteFilePath = path.join(process.cwd(), "public", document.filePath.replace(/^\//, ""));
-    await unlink(absoluteFilePath);
+    await fileStorage.delete(document.filePath);
   } catch {
-    logger.warn("Failed to delete document file from disk (DB row already removed)", {
+    logger.warn("Failed to delete document file from storage (DB row already removed)", {
       operation: "DELETE /api/vendor/documents/[documentId]",
       errorCode: "DOCUMENT_FILE_DELETE_FAILED",
     });

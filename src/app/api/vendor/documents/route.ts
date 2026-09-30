@@ -2,9 +2,10 @@
  * MuggedMoments — POST /api/vendor/documents (Brochure upload)
  *
  * Uploads one vendor brochure (PDF) via native Next.js formData() — no upload
- * library, same pattern as /api/vendor/portfolio/route.ts. Local disk storage
- * under public/uploads/vendor-documents/<vendorId>/ — same documented limitation
- * (does not survive redeploys on ephemeral filesystems).
+ * library, same pattern as /api/vendor/portfolio/route.ts. Storage goes through
+ * fileStorage (src/lib/fileStorage) — Vercel Blob when BLOB_READ_WRITE_TOKEN is
+ * set, local disk otherwise. Confirmed live in production: local disk alone
+ * does not survive Vercel's read-only runtime filesystem.
  *
  * PRIVACY SCAN: before the file is ever written to disk, its PDF text layer is
  * extracted (unpdf) and run through the same detectContactInfo() the in-app
@@ -33,13 +34,12 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { mkdir, writeFile, unlink } from "fs/promises";
-import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import { extractText, getDocumentProxy } from "unpdf";
 import { getVendorSession } from "@/lib/vendorSession";
 import { createAuditLog } from "@/domain/audit/auditService";
 import { toApiErrorResponse } from "@/lib/errors";
+import { fileStorage } from "@/lib/fileStorage";
 import { detectContactInfo } from "@/domain/messaging/contactInfoFilter";
 import {
   isAllowedDocumentMimeType,
@@ -148,20 +148,20 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 
   const fileId = uuidv4();
-  const filePath = buildDocumentPath(session.vendorId, fileId, file.type);
-  const absoluteDir = path.join(process.cwd(), "public", "uploads", "vendor-documents", session.vendorId);
-  const absoluteFilePath = path.join(process.cwd(), "public", filePath.replace(/^\//, ""));
+  const relativePath = buildDocumentPath(session.vendorId, fileId, file.type);
 
-  let fileWritten = false;
+  let uploadedPath: string | null = null;
   try {
-    await mkdir(absoluteDir, { recursive: true });
-    await writeFile(absoluteFilePath, buffer);
-    fileWritten = true;
+    uploadedPath = await fileStorage.upload({
+      buffer,
+      relativePath,
+      contentType: file.type,
+    });
 
     const document = await prisma.vendorDocument.create({
       data: {
         vendorId: session.vendorId,
-        filePath,
+        filePath: uploadedPath,
         originalFilename: sanitizeOriginalFilename(file.name),
         fileSizeBytes: file.size,
       },
@@ -184,9 +184,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       { status: 201 }
     );
   } catch (error) {
-    if (fileWritten) {
+    if (uploadedPath) {
       try {
-        await unlink(absoluteFilePath);
+        await fileStorage.delete(uploadedPath);
       } catch {
         logger.warn("Failed to clean up orphaned document file after DB write failure", {
           operation: "POST /api/vendor/documents",
