@@ -1457,6 +1457,44 @@ export async function updateLeadDetailsForAdmin(
   return updated!;
 }
 
+/**
+ * Permanently deletes a lead and everything that references it. Irreversible.
+ *
+ * Lead's direct children all already have onDelete: Cascade (LeadAttribution,
+ * LeadEvent, LeadScore, LeadVendorMatch, LeadQualification,
+ * AutomationExecution, VendorOpportunity), and VendorOpportunity itself
+ * cascades further into Quote -> QuoteVersion -> QuoteLineItem/QuoteMessage
+ * and into BookingRequest. The one gap (confirmed empirically this session
+ * deleting a test vendor with the mirror-image bug): Booking.bookingRequest
+ * has NO cascade, so a real confirmed Booking under this lead would block
+ * BookingRequest's own cascade and throw a foreign key violation. Those
+ * Booking rows (reached via lead -> opportunity -> bookingRequest -> booking)
+ * are deleted first, same pre-clearing pattern as deleteVendorForAdmin().
+ */
+export async function deleteLeadForAdmin(publicLeadId: string): Promise<{ publicLeadId: string }> {
+  const lead = await prisma.lead.findUnique({ where: { publicLeadId } });
+  if (!lead) {
+    throw new NotFoundError("Lead");
+  }
+
+  await prisma.$transaction([
+    prisma.booking.deleteMany({
+      where: { bookingRequest: { opportunity: { leadId: lead.id } } },
+    }),
+    prisma.lead.delete({ where: { id: lead.id } }),
+  ]);
+
+  await createAuditLog({
+    entityType: "Lead",
+    entityId: lead.id,
+    action: "LEAD_DELETED",
+    actorType: "USER",
+    metadata: { publicLeadId },
+  });
+
+  return { publicLeadId };
+}
+
 export interface LeadSummary {
   publicLeadId: string;
   eventType: string;

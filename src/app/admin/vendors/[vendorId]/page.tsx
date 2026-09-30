@@ -2,15 +2,17 @@
  * MuggedMoments — /admin/vendors/[vendorId]
  *
  * Server component, calls Prisma + getVendorTimeline() directly — same
- * architecture choice as /admin/leads/[publicLeadId] (no client-side fetch,
- * no interactivity needed on this page).
+ * architecture choice as /admin/leads/[publicLeadId]. The one interactive
+ * piece (edit form + delete) is delegated to AdminVendorDetailActions.tsx,
+ * same split as AdminLeadDetailCard.tsx on the lead detail page.
  *
- * Covered by middleware.ts's Basic Auth gate (/admin/:path*).
+ * Covered by proxy.ts's Basic Auth gate (/admin/:path*).
  */
 
 import { notFound } from "next/navigation";
 import prisma from "@/lib/db/prisma";
 import { getVendorTimeline } from "@/domain/vendorProfile/adminVendorService";
+import { AdminVendorDetailActions } from "./AdminVendorDetailActions";
 
 // Same reasoning as /admin/leads/page.tsx — forced dynamic so this always
 // reflects the vendor's current status/timeline rather than whatever it
@@ -36,6 +38,7 @@ export default async function AdminVendorDetailPage({
       startingPrice: true,
       serviceAreas: true,
       createdAt: true,
+      services: { select: { service: { select: { slug: true } } } },
     },
   });
 
@@ -49,6 +52,18 @@ export default async function AdminVendorDetailPage({
     <div className="min-h-screen bg-zinc-950 text-zinc-100 p-8">
       <h1 className="text-2xl font-bold text-white mb-1">{vendor.name}</h1>
       <p className="text-zinc-400 text-sm mb-6">{vendor.city}</p>
+
+      <AdminVendorDetailActions
+        initialDetail={{
+          id: vendor.id,
+          name: vendor.name,
+          city: vendor.city,
+          about: vendor.about,
+          startingPrice: vendor.startingPrice,
+          serviceAreas: vendor.serviceAreas,
+          services: vendor.services.map((s) => s.service.slug),
+        }}
+      />
 
       <div className="rounded-xl border border-zinc-800 p-4 mb-8 text-sm flex flex-col gap-2">
         <div>

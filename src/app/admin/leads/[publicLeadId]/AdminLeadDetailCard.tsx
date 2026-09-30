@@ -14,7 +14,8 @@
 "use client";
 
 import { useState } from "react";
-import { Input, Button } from "@/components/ui";
+import { useRouter } from "next/navigation";
+import { Input, Button, Modal } from "@/components/ui";
 import type { AdminLeadDetail } from "@/services/lead/leadService";
 
 interface AdminLeadDetailCardProps {
@@ -27,8 +28,12 @@ function toDateInputValue(iso: string | null): string {
 }
 
 export function AdminLeadDetailCard({ initialDetail }: AdminLeadDetailCardProps) {
+  const router = useRouter();
   const [detail, setDetail] = useState(initialDetail);
   const [editing, setEditing] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [customerName, setCustomerName] = useState(detail.customerName);
   const [phone, setPhone] = useState(detail.phone);
   const [city, setCity] = useState(detail.city);
@@ -90,6 +95,27 @@ export function AdminLeadDetailCard({ initialDetail }: AdminLeadDetailCardProps)
       setError("Could not reach the server. Please try again.");
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function handleDelete() {
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      const res = await fetch(`/api/internal/leads/${detail.publicLeadId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        const json = await res.json();
+        setDeleteError(json?.error?.message ?? "Could not delete this lead.");
+        return;
+      }
+      router.push("/admin/leads");
+      router.refresh();
+    } catch {
+      setDeleteError("Could not reach the server. Please try again.");
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -185,13 +211,22 @@ export function AdminLeadDetailCard({ initialDetail }: AdminLeadDetailCardProps)
     <div className="rounded-xl border border-zinc-800 p-6 mb-6">
       <div className="flex items-center justify-between mb-4">
         <span className="text-xs text-zinc-500 uppercase tracking-wide">Requirement Details</span>
-        <button
-          type="button"
-          onClick={startEditing}
-          className="text-xs text-amber-400 underline hover:text-amber-300"
-        >
-          Edit
-        </button>
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={startEditing}
+            className="text-xs text-amber-400 underline hover:text-amber-300"
+          >
+            Edit
+          </button>
+          <button
+            type="button"
+            onClick={() => setConfirmingDelete(true)}
+            className="text-xs text-red-400 underline hover:text-red-300"
+          >
+            Delete
+          </button>
+        </div>
       </div>
       <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm">
         <div>
@@ -265,6 +300,38 @@ export function AdminLeadDetailCard({ initialDetail }: AdminLeadDetailCardProps)
           </div>
         )}
       </div>
+
+      <Modal
+        isOpen={confirmingDelete}
+        onClose={() => setConfirmingDelete(false)}
+        title="Delete this lead?"
+      >
+        <div className="flex flex-col gap-4">
+          <p className="text-zinc-200 text-sm">
+            This permanently deletes <span className="font-mono">{detail.publicLeadId}</span> —
+            the customer&apos;s submitted request, every vendor match, quote, message, and
+            booking tied to it. This cannot be undone.
+          </p>
+          {deleteError && (
+            <div className="text-sm text-red-400 bg-red-950/40 border border-red-900 rounded-md p-3">
+              {deleteError}
+            </div>
+          )}
+          <div className="flex gap-3 justify-end">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setConfirmingDelete(false)}
+              disabled={deleting}
+            >
+              Cancel
+            </Button>
+            <Button variant="primary" size="sm" loading={deleting} onClick={handleDelete}>
+              Delete Permanently
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

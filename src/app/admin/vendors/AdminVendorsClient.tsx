@@ -34,6 +34,12 @@ export function AdminVendorsClient() {
     vendorName: string;
     status: "VERIFIED" | "REJECTED";
   } | null>(null);
+  const [confirmingDelete, setConfirmingDelete] = useState<{
+    vendorId: string;
+    vendorName: string;
+  } | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -74,6 +80,25 @@ export function AdminVendorsClient() {
       );
     } finally {
       setPendingActionId(null);
+    }
+  }
+
+  async function handleDelete(vendorId: string) {
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      const res = await fetch(`/api/internal/vendors/${vendorId}`, { method: "DELETE" });
+      if (!res.ok) {
+        const json = await res.json();
+        setDeleteError(json?.error?.message ?? "Could not delete this vendor.");
+        return;
+      }
+      setVendors((prev) => (prev ? prev.filter((v) => v.id !== vendorId) : prev));
+      setConfirmingDelete(null);
+    } catch {
+      setDeleteError("Could not reach the server. Please try again.");
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -166,9 +191,18 @@ export function AdminVendorsClient() {
                         Reject
                       </Button>
                     </div>
-                  ) : (
-                    <span className="text-zinc-500">—</span>
-                  )}
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setConfirmingDelete({ vendorId: vendor.id, vendorName: vendor.name })
+                    }
+                    className={`text-xs text-red-400 underline hover:text-red-300 ${
+                      vendor.verificationStatus === "PENDING" ? "mt-2 block" : ""
+                    }`}
+                  >
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))}
@@ -201,6 +235,52 @@ export function AdminVendorsClient() {
                 }}
               >
                 Confirm
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      <Modal
+        isOpen={confirmingDelete !== null}
+        onClose={() => {
+          setConfirmingDelete(null);
+          setDeleteError(null);
+        }}
+        title="Delete this vendor?"
+      >
+        {confirmingDelete && (
+          <div className="flex flex-col gap-4">
+            <p className="text-zinc-200 text-sm">
+              This permanently deletes{" "}
+              <span className="font-semibold">{confirmingDelete.vendorName}</span> — their
+              profile, portfolio images, brochure documents, every match, opportunity, quote,
+              message, and booking tied to them. This cannot be undone.
+            </p>
+            {deleteError && (
+              <div className="text-sm text-red-400 bg-red-950/40 border border-red-900 rounded-md p-3">
+                {deleteError}
+              </div>
+            )}
+            <div className="flex gap-3 justify-end">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  setConfirmingDelete(null);
+                  setDeleteError(null);
+                }}
+                disabled={deleting}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                loading={deleting}
+                onClick={() => handleDelete(confirmingDelete.vendorId)}
+              >
+                Delete Permanently
               </Button>
             </div>
           </div>
