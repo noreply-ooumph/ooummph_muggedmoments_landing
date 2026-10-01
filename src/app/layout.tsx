@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { PageViewTracker } from "./PageViewTracker";
+import { BackgroundVideo } from "@/components/public/BackgroundVideo";
 import { SITE_CONFIG } from "@/config/content";
 
 const geistSans = Geist({
@@ -56,19 +57,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col bg-zinc-950 text-zinc-100 selection:bg-amber-400 selection:text-zinc-950">
         {/* Global Fixed Background Video Across Entire App */}
-        <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="auto"
-            className="w-full h-full object-cover opacity-60"
-          >
-            <source src="/bg-video.mp4" type="video/mp4" />
-          </video>
-          <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/60 via-zinc-950/40 to-zinc-950/75" />
-        </div>
+        <BackgroundVideo />
 
         <script
           type="application/ld+json"
