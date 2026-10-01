@@ -68,7 +68,7 @@ export default function HomeClient() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col font-sans selection:bg-amber-400 selection:text-zinc-950">
+    <div className="min-h-screen bg-transparent text-zinc-100 flex flex-col font-sans">
       {/* Navigation Header */}
       <Header onStartForm={() => handleStartForm()} />
 

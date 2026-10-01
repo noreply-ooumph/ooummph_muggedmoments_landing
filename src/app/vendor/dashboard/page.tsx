@@ -55,13 +55,34 @@ export default async function VendorDashboardPage() {
     { label: "Service areas", done: vendor.serviceAreas.length > 0 },
   ];
 
+  const scheduledMeetingsCount = await prisma.vendorMeeting.count({
+    where: { vendorId: session.vendorId, status: "SCHEDULED" },
+  });
+
   return (
-    <div className="w-full max-w-md mx-auto p-8 bg-zinc-900 rounded-xl border border-zinc-800">
-      <h1 className="text-xl font-semibold text-zinc-100 mb-2">{vendor.name}</h1>
-      <p className="text-sm text-zinc-400 mb-4">{vendor.city}</p>
-      <div className="mb-6">
+    <div className="w-full max-w-md mx-auto p-8 bg-zinc-900/80 backdrop-blur-md rounded-xl border border-zinc-800 space-y-6">
+      <div>
+        <h1 className="text-xl font-semibold text-zinc-100 mb-2">{vendor.name}</h1>
+        <p className="text-sm text-zinc-400 mb-4">{vendor.city}</p>
         <StatusBadge label={status.label} tone={status.tone} />
       </div>
+
+      {scheduledMeetingsCount > 0 && (
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-xs text-amber-300 flex items-center justify-between gap-3 shadow-inner">
+          <div>
+            <p className="font-bold text-amber-400 text-sm">📅 New Meeting Request{scheduledMeetingsCount > 1 ? "s" : ""}</p>
+            <p className="text-zinc-300 mt-0.5">
+              You have <span className="font-bold text-white">{scheduledMeetingsCount}</span> customer consultation{scheduledMeetingsCount > 1 ? "s" : ""} awaiting review.
+            </p>
+          </div>
+          <Link
+            href="/vendor/dashboard/meetings"
+            className="px-3 py-1.5 bg-amber-400 text-zinc-950 font-bold rounded-lg hover:bg-amber-300 shrink-0 transition-colors"
+          >
+            Review →
+          </Link>
+        </div>
+      )}
 
       <div className="mb-6">
         <p className="text-sm text-zinc-400 mb-2">

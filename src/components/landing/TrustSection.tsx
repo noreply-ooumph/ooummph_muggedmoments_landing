@@ -21,7 +21,7 @@ export function TrustSection() {
   const approvedClaims = getApprovedTrustClaims("homepage_trust_section");
 
   return (
-    <section id="reassurance" className="py-20 bg-zinc-950 border-t border-zinc-800/80">
+    <section id="reassurance" className="py-20 bg-transparent border-t border-zinc-800/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-xs uppercase font-semibold text-amber-400 tracking-wider mb-2">
@@ -36,7 +36,7 @@ export function TrustSection() {
           {REASSURANCE_POINTS.map((pt) => (
             <div
               key={pt.title}
-              className="p-6 bg-zinc-900/40 border border-zinc-800 rounded-xl hover:border-zinc-700 transition-colors"
+              className="p-6 bg-zinc-900/90 backdrop-blur-md border border-zinc-800 hover:border-amber-500/40 rounded-xl shadow-xl transition-all duration-200 hover:-translate-y-1"
             >
               <div className="text-3xl mb-3">{pt.icon}</div>
               <h4 className="text-base font-bold text-white mb-2">{pt.title}</h4>

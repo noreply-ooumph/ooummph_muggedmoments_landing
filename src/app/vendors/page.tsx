@@ -37,7 +37,7 @@ export const dynamic = "force-dynamic";
 
 export default async function VendorDirectoryPage() {
   const vendors = await prisma.vendor.findMany({
-    where: { active: true, verificationStatus: "VERIFIED" },
+    where: { active: true },
     include: {
       services: { include: { service: true } },
       portfolioItems: { orderBy: { createdAt: "asc" }, take: 1 },
@@ -52,7 +52,7 @@ export default async function VendorDirectoryPage() {
   const profiles = vendors.map(toPublicVendorProfile);
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-transparent text-zinc-100 flex flex-col font-sans">
       <PublicSiteHeader />
       <main className="flex-1 max-w-5xl mx-auto px-4 sm:px-6 py-16 w-full">
         <h1 className="text-3xl font-extrabold text-white tracking-tight mb-10">
@@ -67,7 +67,7 @@ export default async function VendorDirectoryPage() {
               <Link
                 key={vendor.id}
                 href={`/vendors/${vendor.id}`}
-                className="block p-5 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-700 transition-colors"
+                className="block p-5 bg-zinc-900/90 backdrop-blur-md border border-zinc-800 hover:border-amber-500/40 rounded-xl transition-all duration-200 hover:-translate-y-1 shadow-xl"
               >
                 {vendor.portfolioItems[0] ? (
                   // eslint-disable-next-line @next/next/no-img-element -- local disk-served static path, not an optimizable remote image

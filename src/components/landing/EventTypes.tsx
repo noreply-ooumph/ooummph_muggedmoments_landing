@@ -16,7 +16,7 @@ interface EventTypesProps {
 
 export function EventTypes({ onSelectEventType }: EventTypesProps) {
   return (
-    <section id="event-types" className="py-20 bg-zinc-950 border-t border-zinc-800/80">
+    <section id="event-types" className="py-20 bg-transparent border-t border-zinc-800/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-xs uppercase font-semibold text-amber-400 tracking-wider mb-2">
@@ -34,7 +34,7 @@ export function EventTypes({ onSelectEventType }: EventTypesProps) {
           {EVENT_TYPES.map((evt) => (
             <div
               key={evt.slug}
-              className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 hover:border-zinc-700 transition-all flex flex-col justify-between"
+              className="bg-zinc-900/90 backdrop-blur-md border border-zinc-800 hover:border-amber-500/40 rounded-2xl p-6 transition-all duration-200 hover:-translate-y-1 shadow-xl flex flex-col justify-between"
             >
               <div>
                 <div className="w-12 h-12 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center text-2xl mb-4">

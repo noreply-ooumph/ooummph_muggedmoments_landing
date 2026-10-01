@@ -191,6 +191,42 @@ export function AdminVendorsClient() {
                         Reject
                       </Button>
                     </div>
+                  ) : vendor.verificationStatus === "REJECTED" ? (
+                    /* REJECTED → offer Approve so ops can reverse the decision */
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="primary"
+                        loading={pendingActionId === vendor.id}
+                        onClick={() =>
+                          setConfirming({
+                            vendorId: vendor.id,
+                            vendorName: vendor.name,
+                            status: "VERIFIED",
+                          })
+                        }
+                      >
+                        Approve
+                      </Button>
+                    </div>
+                  ) : vendor.verificationStatus === "VERIFIED" ? (
+                    /* VERIFIED → offer Reject so ops can revoke if needed */
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        loading={pendingActionId === vendor.id}
+                        onClick={() =>
+                          setConfirming({
+                            vendorId: vendor.id,
+                            vendorName: vendor.name,
+                            status: "REJECTED",
+                          })
+                        }
+                      >
+                        Reject
+                      </Button>
+                    </div>
                   ) : null}
                   <button
                     type="button"

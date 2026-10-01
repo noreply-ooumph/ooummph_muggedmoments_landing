@@ -35,15 +35,20 @@ export default async function VendorDashboardLayout({
     redirect("/vendor");
   }
 
-  const [opportunityCount, bookingRequestCount] = await Promise.all([
+  const [opportunityCount, bookingRequestCount, meetingCount] = await Promise.all([
     prisma.vendorOpportunity.count({ where: { vendorId: session.vendorId } }),
     prisma.bookingRequest.count({ where: { opportunity: { vendorId: session.vendorId } } }),
+    prisma.vendorMeeting.count({ where: { vendorId: session.vendorId, status: "SCHEDULED" } }),
   ]);
 
   return (
     <VendorDashboardShell
       vendor={vendor}
-      counts={{ opportunities: opportunityCount, bookingRequests: bookingRequestCount }}
+      counts={{
+        opportunities: opportunityCount,
+        bookingRequests: bookingRequestCount,
+        meetings: meetingCount,
+      }}
     >
       {children}
     </VendorDashboardShell>

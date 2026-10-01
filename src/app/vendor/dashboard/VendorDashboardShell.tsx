@@ -33,7 +33,7 @@ interface NavItem {
 
 interface VendorDashboardShellProps {
   vendor: { name: string; city: string; verificationStatus: string };
-  counts: { opportunities: number; bookingRequests: number };
+  counts: { opportunities: number; bookingRequests: number; meetings?: number };
   children: React.ReactNode;
 }
 
@@ -44,6 +44,7 @@ export function VendorDashboardShell({ vendor, counts, children }: VendorDashboa
     { href: "/vendor/dashboard", label: "Dashboard" },
     { href: "/vendor/dashboard/opportunities", label: "Opportunities", count: counts.opportunities },
     { href: "/vendor/dashboard/booking-requests", label: "Booking Requests", count: counts.bookingRequests },
+    { href: "/vendor/dashboard/meetings", label: "Meetings", count: counts.meetings },
     { href: "/vendor/dashboard/availability", label: "Availability" },
     { href: "/vendor/dashboard/edit", label: "Edit Profile" },
   ];
@@ -51,7 +52,7 @@ export function VendorDashboardShell({ vendor, counts, children }: VendorDashboa
   const badge = VERIFICATION_BADGE[vendor.verificationStatus] ?? VERIFICATION_BADGE.PENDING;
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col">
+    <div className="min-h-screen bg-transparent flex flex-col">
       <header className="sticky top-0 z-40 w-full border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-lg">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">

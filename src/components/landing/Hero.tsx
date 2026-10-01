@@ -22,12 +22,12 @@ export function Hero({ onSelectEventType, onPrimaryCta }: HeroProps) {
   const router = useRouter();
 
   return (
-    <section className="relative pt-12 pb-20 md:pt-20 md:pb-28 overflow-hidden bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950">
+    <section className="relative pt-12 pb-20 md:pt-20 md:pb-28 overflow-hidden bg-transparent">
       {/* Dynamic Background Glows */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-amber-500/10 blur-[120px] rounded-full pointer-events-none" />
-      <div className="absolute top-1/3 right-10 w-[300px] h-[200px] bg-purple-500/10 blur-[100px] rounded-full pointer-events-none" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-amber-500/10 blur-[120px] rounded-full pointer-events-none z-0" />
+      <div className="absolute top-1/3 right-10 w-[300px] h-[200px] bg-purple-500/10 blur-[100px] rounded-full pointer-events-none z-0" />
 
-      <div className="relative max-w-5xl mx-auto px-4 sm:px-6 text-center">
+      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center">
         {/* Stage 1 Attract Badge */}
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900/90 border border-amber-500/30 text-amber-400 text-xs font-semibold mb-6 shadow-inner">
           <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />

@@ -15,7 +15,7 @@ export default async function StatusPage({
   const { publicLeadId } = await params;
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-transparent flex items-center justify-center p-6">
       <StatusPageClient publicLeadId={publicLeadId} />
     </div>
   );

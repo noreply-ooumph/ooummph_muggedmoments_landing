@@ -11,7 +11,7 @@ import { PROCESS_STEPS } from "@/config/content";
 
 export function WhatHappensNext() {
   return (
-    <section id="how-it-works" className="py-20 bg-zinc-900/40 border-t border-zinc-800/80">
+    <section id="how-it-works" className="py-20 bg-transparent border-t border-zinc-800/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-xs uppercase font-semibold text-amber-400 tracking-wider mb-2">
@@ -29,7 +29,7 @@ export function WhatHappensNext() {
           {PROCESS_STEPS.map((step) => (
             <div
               key={step.step}
-              className="relative p-6 bg-zinc-900 border border-zinc-800 rounded-2xl flex flex-col justify-between"
+              className="relative p-6 bg-zinc-900/90 backdrop-blur-md border border-zinc-800 hover:border-amber-500/40 rounded-2xl transition-all duration-200 hover:-translate-y-1 shadow-xl flex flex-col justify-between"
             >
               <div>
                 <div className="w-10 h-10 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold flex items-center justify-center text-sm mb-5">

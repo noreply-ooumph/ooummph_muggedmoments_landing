@@ -102,8 +102,8 @@ export default function VendorAuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6">
-      <div className="w-full max-w-md mx-auto p-8 bg-zinc-900 rounded-xl border border-zinc-800">
+    <div className="min-h-screen bg-transparent flex items-center justify-center p-6">
+      <div className="w-full max-w-md mx-auto p-8 bg-zinc-900/80 backdrop-blur-md rounded-xl border border-zinc-800">
         <h1 className="text-xl font-semibold text-zinc-100 mb-6">{heading}</h1>
 
         {error && (

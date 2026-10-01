@@ -67,7 +67,7 @@ export default async function VendorBookingRequestDetailPage({
   const total = calculateTotal(bookingRequest.quoteVersion.lineItems);
 
   return (
-    <div className="w-full max-w-md mx-auto p-8 bg-zinc-900 rounded-xl border border-zinc-800">
+    <div className="w-full max-w-md mx-auto p-8 bg-zinc-900/80 backdrop-blur-md rounded-xl border border-zinc-800">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-semibold text-zinc-100">Booking Request</h1>
         <Link href="/vendor/dashboard/booking-requests" className="text-sm text-zinc-400 underline hover:text-zinc-200">

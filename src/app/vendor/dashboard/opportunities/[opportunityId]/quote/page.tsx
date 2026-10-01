@@ -94,7 +94,7 @@ export default async function VendorQuoteBuilderPage({
         everything from scratch in every quote.
       </p>
       {current && (
-        <div className="w-full max-w-md mx-auto mt-4 p-4 bg-zinc-900 rounded-xl border border-zinc-800">
+        <div className="w-full max-w-md mx-auto mt-4 p-4 bg-zinc-900/80 backdrop-blur-md rounded-xl border border-zinc-800">
           <VendorMessageThread
             opportunityId={opportunity.id}
             messages={

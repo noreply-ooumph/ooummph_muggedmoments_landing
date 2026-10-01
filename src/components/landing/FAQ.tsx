@@ -29,7 +29,7 @@ export function FAQ({ title, items }: FAQProps) {
   };
 
   return (
-    <section id="faq" className="py-20 bg-zinc-900/60 border-t border-zinc-800/80">
+    <section id="faq" className="py-20 bg-transparent border-t border-zinc-800/60">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-xs uppercase font-semibold text-amber-400 tracking-wider mb-2">
@@ -44,7 +44,7 @@ export function FAQ({ title, items }: FAQProps) {
           {faqItems.map((item, idx) => (
             <div
               key={item.question}
-              className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden transition-all"
+              className="bg-zinc-900/90 backdrop-blur-md border border-zinc-800 hover:border-amber-500/40 rounded-xl overflow-hidden transition-all shadow-md"
             >
               <button
                 onClick={() => toggle(idx)}

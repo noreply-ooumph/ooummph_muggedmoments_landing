@@ -64,11 +64,11 @@ export default async function PublicVendorProfilePage({
   const ctaHref = `/plan-event${ctaParams.toString() ? `?${ctaParams.toString()}` : ""}`;
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col">
+    <div className="min-h-screen bg-transparent flex flex-col">
       <PublicSiteHeader />
 
       <main className="flex-1 flex items-start justify-center p-6">
-        <div className="w-full max-w-md mx-auto bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden">
+        <div className="w-full max-w-md mx-auto bg-zinc-900/80 backdrop-blur-md rounded-xl border border-zinc-800 overflow-hidden">
           {/* Hero */}
           {heroImage ? (
             // eslint-disable-next-line @next/next/no-img-element -- local disk-served static path, not an optimizable remote image
@@ -92,15 +92,11 @@ export default async function PublicVendorProfilePage({
             </div>
 
             <Link
-              href={ctaHref}
-              className="block w-full text-center rounded-md bg-amber-400 text-zinc-950 font-semibold py-2.5 mb-6 hover:bg-amber-300 transition-colors"
+              href={`/vendors/${profile.id}/book-meeting`}
+              className="block w-full text-center rounded-xl bg-amber-400 text-zinc-950 font-bold py-3 mb-6 hover:bg-amber-300 shadow-md shadow-amber-400/10 transition-all text-base"
             >
-              Start Planning
+              📅 Book a Meeting
             </Link>
-            <p className="text-xs text-zinc-500 -mt-4 mb-6">
-              We&apos;ll match you with vendors like this one based on your requirements —
-              matching is automatic and doesn&apos;t guarantee this specific vendor.
-            </p>
 
             {profile.startingPrice !== null && (
               <div className="mb-4">

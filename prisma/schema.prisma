@@ -266,6 +266,7 @@ model Vendor {
   opportunities  VendorOpportunity[]
   bookings       Booking[]
   attribution    VendorAttribution?
+  meetings       VendorMeeting[]
 
   @@index([city])
   @@index([active])
@@ -721,4 +722,37 @@ model AnalyticsEvent {
   @@index([leadId])
   @@index([createdAt])
   @@map("analytics_events")
+}
+
+// ============================================================
+// VENDOR MEETINGS / CONSULTATIONS
+// ============================================================
+
+enum MeetingStatus {
+  SCHEDULED
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+model VendorMeeting {
+  id            String        @id @default(uuid())
+  publicId      String        @unique @default(uuid()) @map("public_id")
+  vendorId      String        @map("vendor_id")
+  customerName  String        @map("customer_name")
+  customerPhone String        @map("customer_phone")
+  customerEmail String?       @map("customer_email")
+  meetingDate   DateTime      @map("meeting_date")
+  timeSlot      String        @map("time_slot")
+  notes         String?       @db.Text
+  status        MeetingStatus @default(SCHEDULED)
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@index([vendorId])
+  @@index([customerPhone])
+  @@index([meetingDate])
+  @@map("vendor_meetings")
 }

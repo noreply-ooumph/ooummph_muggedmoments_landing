@@ -208,7 +208,7 @@ export function QuoteBuilderClient({ opportunityId, canRevise, canDiscard, quote
   const total = calculateTotal(lineItems);
 
   return (
-    <div className="w-full max-w-md mx-auto p-8 bg-zinc-900 rounded-xl border border-zinc-800">
+    <div className="w-full max-w-md mx-auto p-8 bg-zinc-900/80 backdrop-blur-md rounded-xl border border-zinc-800">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-semibold text-zinc-100">
           {submitted ? "Submitted Quote" : "Build Your Quote"}
