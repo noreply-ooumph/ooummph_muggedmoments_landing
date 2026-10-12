@@ -14,7 +14,6 @@
 
 import React from "react";
 import type { PublicVendorMatch } from "@/types";
-import { AVAILABILITY_LABEL } from "./MatchList";
 
 interface MatchComparisonTableProps {
   matches: PublicVendorMatch[];
@@ -36,7 +35,6 @@ export function MatchComparisonTable({ matches }: MatchComparisonTableProps) {
               <th className="px-4 py-2 font-medium">City</th>
               <th className="px-4 py-2 font-medium">Services</th>
               <th className="px-4 py-2 font-medium">Starting Price</th>
-              <th className="px-4 py-2 font-medium">Availability</th>
             </tr>
           </thead>
           <tbody>
@@ -50,9 +48,6 @@ export function MatchComparisonTable({ matches }: MatchComparisonTableProps) {
                 <td className="px-4 py-2 text-zinc-400">{match.services.join(", ")}</td>
                 <td className="px-4 py-2 text-zinc-400">
                   {match.startingPrice !== null ? `₹${match.startingPrice}` : "—"}
-                </td>
-                <td className="px-4 py-2 text-zinc-400">
-                  {AVAILABILITY_LABEL[match.availability]}
                 </td>
               </tr>
             ))}

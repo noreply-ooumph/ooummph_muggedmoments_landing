@@ -85,16 +85,19 @@ export default async function VendorQuoteBuilderPage({
             : null
         }
       />
-      <p className="w-full max-w-md mx-auto mt-4 text-xs text-zinc-500">
-        Have a portfolio or brochure ready?{" "}
-        <Link href="/vendor/dashboard/edit" className="underline hover:text-zinc-300">
+      <p className="w-full max-w-5xl mx-auto mt-4 text-xs text-zinc-400 bg-zinc-900/40 border border-zinc-800/60 rounded-xl p-4">
+        💡 Have a portfolio or brochure ready?{" "}
+        <Link href="/vendor/dashboard/edit" className="text-amber-400 underline hover:text-amber-300 font-medium">
           Add it to your profile once
         </Link>{" "}
         — it&apos;s shown automatically to customers, so you don&apos;t need to describe
         everything from scratch in every quote.
       </p>
       {current && (
-        <div className="w-full max-w-md mx-auto mt-4 p-4 bg-zinc-900/80 backdrop-blur-md rounded-xl border border-zinc-800">
+        <div className="w-full max-w-5xl mx-auto mt-6 p-6 bg-zinc-900/70 backdrop-blur-md rounded-2xl border border-zinc-800/80 shadow-xl">
+          <h3 className="text-sm font-semibold text-zinc-200 mb-2 flex items-center gap-2">
+            💬 Customer Inquiry & Q&A Thread
+          </h3>
           <VendorMessageThread
             opportunityId={opportunity.id}
             messages={

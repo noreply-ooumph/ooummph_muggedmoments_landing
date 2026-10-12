@@ -208,27 +208,38 @@ export function QuoteBuilderClient({ opportunityId, canRevise, canDiscard, quote
   const total = calculateTotal(lineItems);
 
   return (
-    <div className="w-full max-w-md mx-auto p-8 bg-zinc-900/80 backdrop-blur-md rounded-xl border border-zinc-800">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-semibold text-zinc-100">
-          {submitted ? "Submitted Quote" : "Build Your Quote"}
-        </h1>
+    <div className="w-full max-w-5xl mx-auto p-6 sm:p-8 bg-zinc-900/70 backdrop-blur-md rounded-2xl border border-zinc-800/80 shadow-2xl text-zinc-100 transition-all duration-300">
+      {/* Header */}
+      <div className="flex items-center justify-between pb-6 border-b border-zinc-800/80 mb-6">
+        <div>
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20 mb-2">
+            Quote Studio
+          </span>
+          <h1 className="text-2xl font-semibold tracking-tight text-white">
+            {submitted ? "Submitted Quote" : "Build Your Quote"}
+          </h1>
+          <p className="text-xs text-zinc-400 mt-1">
+            Provide details, itemized pricing, and terms for this customer opportunity.
+          </p>
+        </div>
         <Link
           href={`/vendor/dashboard/opportunities/${opportunityId}`}
-          className="text-sm text-zinc-400 underline hover:text-zinc-200"
+          className="inline-flex items-center gap-1 text-sm font-medium text-zinc-400 hover:text-amber-400 transition-colors bg-zinc-800/60 border border-zinc-700/60 rounded-xl px-4 py-2 hover:border-zinc-600"
         >
-          Back
+          ← Back to Details
         </Link>
       </div>
 
       {saved && !submitted && (
-        <div className="mb-4 text-sm text-emerald-400 bg-emerald-950/40 border border-emerald-900 rounded-md p-3">
-          Draft saved.
+        <div className="mb-6 text-sm text-emerald-400 bg-emerald-950/40 border border-emerald-800/60 rounded-xl p-4 flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          Draft saved successfully.
         </div>
       )}
 
       {submitted && (
-        <div className="mb-4 text-sm text-emerald-400 bg-emerald-950/40 border border-emerald-900 rounded-md p-3">
+        <div className="mb-6 text-sm text-emerald-400 bg-emerald-950/40 border border-emerald-800/60 rounded-xl p-4 flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-400" />
           Quote submitted (version {quote?.versionNumber}). This version can no longer be edited.
         </div>
       )}
@@ -238,17 +249,17 @@ export function QuoteBuilderClient({ opportunityId, canRevise, canDiscard, quote
           type="button"
           onClick={startRevision}
           disabled={revising}
-          className="w-full mb-4 rounded-md bg-zinc-700 text-zinc-100 font-medium py-2 disabled:opacity-50"
+          className="w-full mb-6 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-amber-400 border border-amber-500/30 font-medium py-3 text-sm transition-all disabled:opacity-50 shadow-md"
         >
-          {revising ? "Starting revision..." : "Revise Quote"}
+          {revising ? "Starting revision..." : "✏️ Revise Quote"}
         </button>
       )}
 
       {error && (
-        <div className="mb-4 text-sm text-red-400 bg-red-950/40 border border-red-900 rounded-md p-3">
-          {error}
+        <div className="mb-6 text-sm text-rose-400 bg-rose-950/40 border border-rose-800/60 rounded-xl p-4">
+          <p className="font-semibold">{error}</p>
           {reasons.length > 0 && (
-            <ul className="list-disc list-inside mt-2">
+            <ul className="list-disc list-inside mt-2 space-y-1 text-xs text-rose-300">
               {reasons.map((reason) => (
                 <li key={reason}>{REASON_MESSAGES[reason]}</li>
               ))}
@@ -257,46 +268,52 @@ export function QuoteBuilderClient({ opportunityId, canRevise, canDiscard, quote
         </div>
       )}
 
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm text-zinc-400 mb-2">Line items</label>
+      <div className="space-y-6">
+        {/* Line Items Section */}
+        <div className="bg-zinc-950/50 rounded-xl p-5 border border-zinc-800/60">
+          <div className="flex items-center justify-between mb-3">
+            <label className="text-sm font-semibold text-zinc-200">Line Items & Pricing</label>
+            <span className="text-xs text-zinc-400">Specify itemized costs</span>
+          </div>
 
           {lineItems.length > 0 && (
-            <div className="mb-2 rounded-md border border-zinc-700 overflow-hidden">
-              <div className="grid grid-cols-[1fr_auto_auto] gap-3 text-xs font-semibold text-zinc-500 uppercase tracking-wide bg-zinc-800/60 px-3 py-2">
-                <span>Item</span>
-                <span className="text-right">Amount</span>
-                <span className="w-4" />
+            <div className="mb-4 rounded-xl border border-zinc-800/80 overflow-hidden bg-zinc-900/40">
+              <div className="grid grid-cols-[1fr_auto_auto] gap-4 text-xs font-semibold text-zinc-400 uppercase tracking-wider bg-zinc-800/50 px-4 py-3 border-b border-zinc-800/60">
+                <span>Item Description</span>
+                <span className="text-right">Amount (₹)</span>
+                <span className="w-6" />
               </div>
-              {lineItems.map((item, index) => (
-                <div
-                  key={`${item.label}-${index}`}
-                  className="grid grid-cols-[1fr_auto_auto] items-center gap-3 text-sm bg-zinc-800/30 border-t border-zinc-700 px-3 py-2"
-                >
-                  <span className="text-zinc-200 truncate">{item.label}</span>
-                  <span className="text-zinc-300 text-right whitespace-nowrap">
-                    ₹{item.amount.toLocaleString("en-IN")}
-                  </span>
-                  {!submitted ? (
-                    <button
-                      type="button"
-                      onClick={() => removeLineItem(index)}
-                      className="text-zinc-500 hover:text-zinc-300 w-4"
-                      aria-label={`Remove ${item.label}`}
-                    >
-                      ×
-                    </button>
-                  ) : (
-                    <span className="w-4" />
-                  )}
-                </div>
-              ))}
+              <div className="divide-y divide-zinc-800/50">
+                {lineItems.map((item, index) => (
+                  <div
+                    key={`${item.label}-${index}`}
+                    className="grid grid-cols-[1fr_auto_auto] items-center gap-4 text-sm px-4 py-3 hover:bg-zinc-800/30 transition-colors"
+                  >
+                    <span className="text-zinc-200 font-medium truncate">{item.label}</span>
+                    <span className="text-amber-400 font-semibold text-right whitespace-nowrap">
+                      ₹{item.amount.toLocaleString("en-IN")}
+                    </span>
+                    {!submitted ? (
+                      <button
+                        type="button"
+                        onClick={() => removeLineItem(index)}
+                        className="text-zinc-500 hover:text-rose-400 w-6 h-6 rounded-lg flex items-center justify-center hover:bg-rose-500/10 transition-colors"
+                        aria-label={`Remove ${item.label}`}
+                      >
+                        ✕
+                      </button>
+                    ) : (
+                      <span className="w-6" />
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
           {!submitted && (
-            <>
-              <div className="flex gap-2">
+            <div className="space-y-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <input
                   type="text"
                   value={newLabel}
@@ -304,8 +321,8 @@ export function QuoteBuilderClient({ opportunityId, canRevise, canDiscard, quote
                     setNewLabel(e.target.value);
                     setLineItemError(null);
                   }}
-                  placeholder="Item (e.g. Decoration)"
-                  className="flex-1 rounded-md bg-zinc-800 border border-zinc-700 px-3 py-2 text-zinc-100"
+                  placeholder="Item name (e.g. Traditional Photography, Stage Decor)"
+                  className="flex-1 rounded-xl bg-zinc-900 border border-zinc-800 px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition-all"
                 />
                 <input
                   type="number"
@@ -315,155 +332,184 @@ export function QuoteBuilderClient({ opportunityId, canRevise, canDiscard, quote
                     setNewAmount(e.target.value);
                     setLineItemError(null);
                   }}
-                  placeholder="Amount"
-                  className="w-28 rounded-md bg-zinc-800 border border-zinc-700 px-3 py-2 text-zinc-100"
+                  placeholder="Amount (₹)"
+                  className="w-full sm:w-36 rounded-xl bg-zinc-900 border border-zinc-800 px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition-all"
                 />
                 <button
                   type="button"
                   onClick={addLineItem}
-                  className="rounded-md bg-zinc-700 text-zinc-100 px-3 py-2 text-sm"
+                  className="rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white border border-zinc-700 px-5 py-2.5 text-sm font-medium transition-all"
                 >
-                  Add
+                  + Add Item
                 </button>
               </div>
               {lineItemError && (
-                <p className="text-xs text-red-400 mt-1">{lineItemError}</p>
+                <p className="text-xs text-rose-400 mt-1 pl-1">{lineItemError}</p>
               )}
-            </>
+            </div>
           )}
-          <p className="text-sm text-zinc-300 mt-2">Total: ₹{total.toLocaleString("en-IN")}</p>
+
+          <div className="mt-4 pt-3 border-t border-zinc-800/60 flex items-center justify-between">
+            <span className="text-sm text-zinc-400 font-medium">Calculated Quote Total</span>
+            <span className="text-xl font-bold text-amber-400">₹{total.toLocaleString("en-IN")}</span>
+          </div>
         </div>
 
-        <div>
-          <label className="block text-sm text-zinc-400 mb-1">Availability for this quote</label>
-          <select
-            value={availabilityState}
-            onChange={(e) => setAvailabilityState(e.target.value as AvailabilityState)}
-            disabled={submitted}
-            className="w-full rounded-md bg-zinc-800 border border-zinc-700 px-3 py-2 text-zinc-100 disabled:opacity-60"
-          >
-            {AVAILABILITY_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+        {/* Availability & Validity Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-zinc-950/50 rounded-xl p-5 border border-zinc-800/60">
+            <label className="block text-sm font-semibold text-zinc-200 mb-2">
+              Availability Status
+            </label>
+            <select
+              value={availabilityState}
+              onChange={(e) => setAvailabilityState(e.target.value as AvailabilityState)}
+              disabled={submitted}
+              className="w-full rounded-xl bg-zinc-900 border border-zinc-800 px-4 py-2.5 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 disabled:opacity-60 transition-all"
+            >
+              {AVAILABILITY_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="bg-zinc-950/50 rounded-xl p-5 border border-zinc-800/60">
+            <label className="block text-sm font-semibold text-zinc-200 mb-2">
+              Valid Until Date
+            </label>
+            <input
+              type="date"
+              value={validUntil}
+              onChange={(e) => setValidUntil(e.target.value)}
+              disabled={submitted}
+              className="w-full rounded-xl bg-zinc-900 border border-zinc-800 px-4 py-2.5 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 disabled:opacity-60 transition-all"
+            />
+          </div>
         </div>
 
-        <div>
-          <label className="block text-sm text-zinc-400 mb-1">Valid until</label>
-          <input
-            type="date"
-            value={validUntil}
-            onChange={(e) => setValidUntil(e.target.value)}
-            disabled={submitted}
-            className="w-full rounded-md bg-zinc-800 border border-zinc-700 px-3 py-2 text-zinc-100 disabled:opacity-60"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm text-zinc-400 mb-1">Notes</label>
+        {/* Notes */}
+        <div className="bg-zinc-950/50 rounded-xl p-5 border border-zinc-800/60">
+          <label className="block text-sm font-semibold text-zinc-200 mb-2">
+            Quote Notes & Terms
+          </label>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             disabled={submitted}
             rows={3}
             maxLength={2000}
-            className="w-full rounded-md bg-zinc-800 border border-zinc-700 px-3 py-2 text-zinc-100 disabled:opacity-60"
+            placeholder="Add payment terms, special instructions, or customization details..."
+            className="w-full rounded-xl bg-zinc-900 border border-zinc-800 px-4 py-3 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 disabled:opacity-60 transition-all"
           />
         </div>
 
-        <div>
-          <label className="block text-sm text-zinc-400 mb-2">Included</label>
-          <div className="flex flex-wrap gap-2 mb-2">
-            {included.map((item) => (
-              <span
-                key={item}
-                className="inline-flex items-center gap-1 text-sm bg-zinc-800 border border-zinc-700 rounded-md px-2 py-1 text-zinc-200"
-              >
-                {item}
-                {!submitted && (
-                  <button
-                    type="button"
-                    onClick={() => setIncluded(included.filter((i) => i !== item))}
-                    className="text-zinc-500 hover:text-zinc-300"
-                    aria-label={`Remove ${item}`}
-                  >
-                    ×
-                  </button>
-                )}
-              </span>
-            ))}
-          </div>
-          {!submitted && (
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={newIncluded}
-                onChange={(e) => setNewIncluded(e.target.value)}
-                className="flex-1 rounded-md bg-zinc-800 border border-zinc-700 px-3 py-2 text-zinc-100"
-                placeholder="Add an included item"
-              />
-              <button
-                type="button"
-                onClick={() => addTag(included, setIncluded, newIncluded, () => setNewIncluded(""))}
-                className="rounded-md bg-zinc-700 text-zinc-100 px-3 py-2 text-sm"
-              >
-                Add
-              </button>
+        {/* Included / Excluded Items Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-zinc-950/50 rounded-xl p-5 border border-zinc-800/60">
+            <label className="block text-sm font-semibold text-emerald-400 mb-3">
+              ✓ Included Features
+            </label>
+            <div className="flex flex-wrap gap-2 mb-3 min-h-[32px]">
+              {included.map((item) => (
+                <span
+                  key={item}
+                  className="inline-flex items-center gap-1.5 text-xs font-medium bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-1.5 text-emerald-300"
+                >
+                  {item}
+                  {!submitted && (
+                    <button
+                      type="button"
+                      onClick={() => setIncluded(included.filter((i) => i !== item))}
+                      className="text-emerald-400/60 hover:text-emerald-300 ml-1"
+                      aria-label={`Remove ${item}`}
+                    >
+                      ✕
+                    </button>
+                  )}
+                </span>
+              ))}
+              {included.length === 0 && (
+                <p className="text-xs text-zinc-500 italic">No included items added yet</p>
+              )}
             </div>
-          )}
+            {!submitted && (
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newIncluded}
+                  onChange={(e) => setNewIncluded(e.target.value)}
+                  placeholder="e.g. Raw footage included"
+                  className="flex-1 rounded-xl bg-zinc-900 border border-zinc-800 px-3 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                />
+                <button
+                  type="button"
+                  onClick={() => addTag(included, setIncluded, newIncluded, () => setNewIncluded(""))}
+                  className="rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3 py-2 text-xs font-medium border border-zinc-700"
+                >
+                  Add
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="bg-zinc-950/50 rounded-xl p-5 border border-zinc-800/60">
+            <label className="block text-sm font-semibold text-rose-400 mb-3">
+              ✕ Excluded Features
+            </label>
+            <div className="flex flex-wrap gap-2 mb-3 min-h-[32px]">
+              {excluded.map((item) => (
+                <span
+                  key={item}
+                  className="inline-flex items-center gap-1.5 text-xs font-medium bg-rose-500/10 border border-rose-500/20 rounded-lg px-3 py-1.5 text-rose-300"
+                >
+                  {item}
+                  {!submitted && (
+                    <button
+                      type="button"
+                      onClick={() => setExcluded(excluded.filter((i) => i !== item))}
+                      className="text-rose-400/60 hover:text-rose-300 ml-1"
+                      aria-label={`Remove ${item}`}
+                    >
+                      ✕
+                    </button>
+                  )}
+                </span>
+              ))}
+              {excluded.length === 0 && (
+                <p className="text-xs text-zinc-500 italic">No excluded items added yet</p>
+              )}
+            </div>
+            {!submitted && (
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newExcluded}
+                  onChange={(e) => setNewExcluded(e.target.value)}
+                  placeholder="e.g. Travel costs extra"
+                  className="flex-1 rounded-xl bg-zinc-900 border border-zinc-800 px-3 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-rose-500/30"
+                />
+                <button
+                  type="button"
+                  onClick={() => addTag(excluded, setExcluded, newExcluded, () => setNewExcluded(""))}
+                  className="rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3 py-2 text-xs font-medium border border-zinc-700"
+                >
+                  Add
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
-        <div>
-          <label className="block text-sm text-zinc-400 mb-2">Not included</label>
-          <div className="flex flex-wrap gap-2 mb-2">
-            {excluded.map((item) => (
-              <span
-                key={item}
-                className="inline-flex items-center gap-1 text-sm bg-zinc-800 border border-zinc-700 rounded-md px-2 py-1 text-zinc-200"
-              >
-                {item}
-                {!submitted && (
-                  <button
-                    type="button"
-                    onClick={() => setExcluded(excluded.filter((i) => i !== item))}
-                    className="text-zinc-500 hover:text-zinc-300"
-                    aria-label={`Remove ${item}`}
-                  >
-                    ×
-                  </button>
-                )}
-              </span>
-            ))}
-          </div>
-          {!submitted && (
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={newExcluded}
-                onChange={(e) => setNewExcluded(e.target.value)}
-                className="flex-1 rounded-md bg-zinc-800 border border-zinc-700 px-3 py-2 text-zinc-100"
-                placeholder="Add a not-included item"
-              />
-              <button
-                type="button"
-                onClick={() => addTag(excluded, setExcluded, newExcluded, () => setNewExcluded(""))}
-                className="rounded-md bg-zinc-700 text-zinc-100 px-3 py-2 text-sm"
-              >
-                Add
-              </button>
-            </div>
-          )}
-        </div>
-
+        {/* Action Buttons */}
         {!submitted && (
-          <div className="flex gap-3 pt-2">
+          <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-zinc-800/80">
             <button
               type="button"
               onClick={saveDraft}
               disabled={submitting}
-              className="flex-1 rounded-md bg-zinc-700 text-zinc-100 font-medium py-2 disabled:opacity-50"
+              className="flex-1 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-semibold py-3.5 border border-zinc-700/80 disabled:opacity-50 transition-all shadow-md"
             >
               Save Draft
             </button>
@@ -471,25 +517,25 @@ export function QuoteBuilderClient({ opportunityId, canRevise, canDiscard, quote
               type="button"
               onClick={submitQuote}
               disabled={submitting}
-              className="flex-1 rounded-md bg-white text-zinc-900 font-medium py-2 disabled:opacity-50"
+              className="flex-1 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-zinc-950 font-bold py-3.5 shadow-lg shadow-amber-500/10 disabled:opacity-50 transition-all"
             >
-              Submit Quote
+              Submit Official Quote
             </button>
           </div>
         )}
 
         {!submitted && canDiscard && (
-          <div className="pt-2">
+          <div className="pt-2 text-center">
             {discardError && (
-              <p className="text-xs text-red-400 mb-2">{discardError}</p>
+              <p className="text-xs text-rose-400 mb-2">{discardError}</p>
             )}
             <button
               type="button"
               onClick={discardDraft}
               disabled={discarding}
-              className="w-full text-sm text-zinc-500 underline hover:text-zinc-300 disabled:opacity-50"
+              className="text-xs text-zinc-400 hover:text-rose-400 underline transition-colors disabled:opacity-50"
             >
-              {discarding ? "Discarding..." : "Discard this revision"}
+              {discarding ? "Discarding..." : "Discard this draft revision"}
             </button>
           </div>
         )}

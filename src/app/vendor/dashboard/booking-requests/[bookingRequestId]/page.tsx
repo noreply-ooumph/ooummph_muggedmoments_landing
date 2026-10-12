@@ -67,72 +67,112 @@ export default async function VendorBookingRequestDetailPage({
   const total = calculateTotal(bookingRequest.quoteVersion.lineItems);
 
   return (
-    <div className="w-full max-w-md mx-auto p-8 bg-zinc-900/80 backdrop-blur-md rounded-xl border border-zinc-800">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-semibold text-zinc-100">Booking Request</h1>
-        <Link href="/vendor/dashboard/booking-requests" className="text-sm text-zinc-400 underline hover:text-zinc-200">
-          Back
-        </Link>
-      </div>
-
-      <div className="space-y-2 mb-6">
-        <p className="text-lg font-medium text-zinc-100">
-          {formatEventTypeDisplay(lead.eventType.name, lead.customEventTypeName)}
-        </p>
-        <p className="text-sm text-zinc-400">📍 {lead.city}</p>
-        {lead.eventDate && (
-          <p className="text-sm text-zinc-400">📅 {lead.eventDate.toLocaleDateString()}</p>
-        )}
-        {lead.guestCount && <p className="text-sm text-zinc-400">👥 {lead.guestCount} guests</p>}
-        <p className="text-sm text-zinc-400">
-          Quote total: <span className="font-mono text-zinc-200">₹{total.toLocaleString("en-IN")}</span>
-        </p>
-        {bookingRequest.status === "REQUESTED" && (
-          <p className="text-sm text-zinc-400">
-            Respond by: <span className="text-zinc-200">{bookingRequest.responseDeadline.toLocaleString()}</span>
-          </p>
-        )}
-      </div>
-
-      {expired && bookingRequest.status === "REQUESTED" && (
-        <p className="text-sm text-zinc-500 mb-3">This request has expired.</p>
-      )}
-
-      {canRespond && <BookingRequestActions bookingRequestId={bookingRequest.id} />}
-
-      {!canRespond && (
-        <div>
-          {bookingRequest.booking?.status === "CANCELLED" ? (
-            // No precedent for this exact case in any existing tone map — new call,
-            // per the brief: "gray" (neutral/negative, matching EXPIRED's tone).
-            <StatusBadge label="This booking was cancelled" tone="gray" />
-          ) : (
-            <StatusBadge
-              label={STATUS_LABEL[bookingRequest.status]?.label ?? bookingRequest.status}
-              tone={STATUS_LABEL[bookingRequest.status]?.tone ?? "zinc"}
-            />
-          )}
+    <div className="w-full space-y-6">
+      <div className="bg-zinc-900/70 border border-zinc-800/80 rounded-2xl p-6 sm:p-8 backdrop-blur-md shadow-2xl space-y-6">
+        {/* Header Bar */}
+        <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold text-white tracking-tight">
+                {formatEventTypeDisplay(lead.eventType.name, lead.customEventTypeName)}
+              </h1>
+              {!canRespond && (
+                <div>
+                  {bookingRequest.booking?.status === "CANCELLED" ? (
+                    <StatusBadge label="This booking was cancelled" tone="gray" />
+                  ) : (
+                    <StatusBadge
+                      label={STATUS_LABEL[bookingRequest.status]?.label ?? bookingRequest.status}
+                      tone={STATUS_LABEL[bookingRequest.status]?.tone ?? "zinc"}
+                    />
+                  )}
+                </div>
+              )}
+            </div>
+            <p className="text-xs text-zinc-400 mt-1">
+              Client quote booking request & response control
+            </p>
+          </div>
+          <Link
+            href="/vendor/dashboard/booking-requests"
+            className="px-3.5 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-semibold text-xs rounded-xl transition-colors border border-zinc-700/60 shrink-0"
+          >
+            ← Back to Booking Requests
+          </Link>
         </div>
-      )}
 
-      {bookingRequest.status === "REJECTED" && bookingRequest.rejectionReason && (
-        <p className="text-xs text-zinc-500 mt-1">{bookingRequest.rejectionReason}</p>
-      )}
+        {/* Key Metrics Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="bg-zinc-950/70 border border-zinc-800/80 rounded-xl p-4">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Location</span>
+            <p className="text-sm font-bold text-white mt-1 flex items-center gap-1.5">
+              <span>📍</span> {lead.city}
+            </p>
+          </div>
 
-      {bookingRequest.status === "ACCEPTED" && bookingRequest.booking?.status === "CONFIRMED" && (
-        <CancelBookingAction bookingRequestId={bookingRequest.id} />
-      )}
+          <div className="bg-zinc-950/70 border border-zinc-800/80 rounded-xl p-4">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Event Date</span>
+            <p className="text-sm font-bold text-white mt-1 flex items-center gap-1.5">
+              <span>📅</span> {lead.eventDate ? lead.eventDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "Flexible / TBD"}
+            </p>
+          </div>
 
-      {bookingRequest.booking && (
-        <>
-          <p className="text-xs text-zinc-500 font-mono mt-3">
-            Booking ID: {bookingRequest.booking.publicBookingId}
-          </p>
-          <BookingTimeline
-            entries={bookingRequest.booking.statusHistory.map(toPublicBookingTimelineEntry)}
-          />
-        </>
-      )}
+          <div className="bg-zinc-950/70 border border-zinc-800/80 rounded-xl p-4">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Guest Count</span>
+            <p className="text-sm font-bold text-white mt-1 flex items-center gap-1.5">
+              <span>👥</span> {lead.guestCount ? `${lead.guestCount} guests` : "Not specified"}
+            </p>
+          </div>
+
+          <div className="bg-zinc-950/70 border border-zinc-800/80 rounded-xl p-4">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Accepted Quote Total</span>
+            <p className="text-sm font-bold text-amber-400 font-mono mt-1 flex items-center gap-1.5">
+              <span>💰</span> ₹{total.toLocaleString("en-IN")}
+            </p>
+          </div>
+        </div>
+
+        {bookingRequest.status === "REQUESTED" && (
+          <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-xs text-amber-300 flex items-center justify-between">
+            <span>⏰ Respond By Deadline:</span>
+            <span className="font-bold text-white font-mono">{bookingRequest.responseDeadline.toLocaleString()}</span>
+          </div>
+        )}
+
+        {expired && bookingRequest.status === "REQUESTED" && (
+          <div className="bg-zinc-950/80 border border-zinc-800 rounded-xl p-4 text-xs text-zinc-400">
+            ⏳ This request has expired.
+          </div>
+        )}
+
+        {canRespond && (
+          <div className="pt-2 border-t border-zinc-800">
+            <BookingRequestActions bookingRequestId={bookingRequest.id} />
+          </div>
+        )}
+
+        {bookingRequest.status === "REJECTED" && bookingRequest.rejectionReason && (
+          <p className="text-xs text-red-400 bg-red-950/40 p-3 rounded-xl border border-red-900">{bookingRequest.rejectionReason}</p>
+        )}
+
+        {bookingRequest.status === "ACCEPTED" && bookingRequest.booking?.status === "CONFIRMED" && (
+          <div className="pt-2 border-t border-zinc-800">
+            <CancelBookingAction bookingRequestId={bookingRequest.id} />
+          </div>
+        )}
+
+        {bookingRequest.booking && (
+          <div className="pt-4 border-t border-zinc-800 space-y-3">
+            <div className="flex items-center justify-between text-xs text-zinc-400">
+              <span className="font-semibold text-white">Confirmed Booking Progress</span>
+              <span className="font-mono text-zinc-500">Ref: {bookingRequest.booking.publicBookingId}</span>
+            </div>
+            <BookingTimeline
+              entries={bookingRequest.booking.statusHistory.map(toPublicBookingTimelineEntry)}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

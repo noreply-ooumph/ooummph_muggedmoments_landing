@@ -91,74 +91,118 @@ export default async function VendorOpportunityDetailPage({
   const canRespond = currentOpportunity.status === "VIEWED" && !expired;
 
   return (
-    <div className="w-full max-w-md mx-auto p-8 bg-zinc-900/80 backdrop-blur-md rounded-xl border border-zinc-800">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-semibold text-zinc-100">New Event Request</h1>
-        <Link href="/vendor/dashboard/opportunities" className="text-sm text-zinc-400 underline hover:text-zinc-200">
-          Back
-        </Link>
-      </div>
-
-      <div className="space-y-2 mb-6">
-        <p className="text-lg font-medium text-zinc-100">
-          {formatEventTypeDisplay(currentOpportunity.lead.eventType.name, currentOpportunity.lead.customEventTypeName)}
-        </p>
-        <p className="text-sm text-zinc-400">📍 {currentOpportunity.lead.city}</p>
-        {currentOpportunity.lead.eventDate && (
-          <p className="text-sm text-zinc-400">
-            📅 {currentOpportunity.lead.eventDate.toLocaleDateString()}
-          </p>
-        )}
-        {currentOpportunity.lead.guestCount && (
-          <p className="text-sm text-zinc-400">👥 {currentOpportunity.lead.guestCount} guests</p>
-        )}
-        {currentOpportunity.lead.services.length > 0 && (
+    <div className="w-full space-y-6">
+      <div className="bg-zinc-900/70 border border-zinc-800/80 rounded-2xl p-6 sm:p-8 backdrop-blur-md shadow-2xl space-y-6">
+        {/* Header Bar */}
+        <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
           <div>
-            <p className="text-sm text-zinc-400 mb-1">Services requested:</p>
-            <ul className="text-sm text-zinc-300 list-disc list-inside">
-              {currentOpportunity.lead.services.map((s) => (
-                <li key={s}>{s}</li>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold text-white tracking-tight">
+                {formatEventTypeDisplay(currentOpportunity.lead.eventType.name, currentOpportunity.lead.customEventTypeName)}
+              </h1>
+              {!canRespond && !expired && (
+                <StatusBadge
+                  label={STATUS_LABEL[currentOpportunity.status]?.label ?? currentOpportunity.status}
+                  tone={STATUS_LABEL[currentOpportunity.status]?.tone ?? "zinc"}
+                />
+              )}
+            </div>
+            <p className="text-xs text-zinc-400 mt-1">
+              Client event request details & consultation options
+            </p>
+          </div>
+          <Link
+            href="/vendor/dashboard/opportunities"
+            className="px-3.5 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-semibold text-xs rounded-xl transition-colors border border-zinc-700/60 shrink-0"
+          >
+            ← Back to Opportunities
+          </Link>
+        </div>
+
+        {/* Event Key Metrics Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="bg-zinc-950/70 border border-zinc-800/80 rounded-xl p-4">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Location</span>
+            <p className="text-sm font-bold text-white mt-1 flex items-center gap-1.5">
+              <span>📍</span> {currentOpportunity.lead.city}
+            </p>
+          </div>
+
+          <div className="bg-zinc-950/70 border border-zinc-800/80 rounded-xl p-4">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Event Date</span>
+            <p className="text-sm font-bold text-white mt-1 flex items-center gap-1.5">
+              <span>📅</span> {currentOpportunity.lead.eventDate ? currentOpportunity.lead.eventDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "Flexible / TBD"}
+            </p>
+          </div>
+
+          <div className="bg-zinc-950/70 border border-zinc-800/80 rounded-xl p-4">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Guest Count</span>
+            <p className="text-sm font-bold text-white mt-1 flex items-center gap-1.5">
+              <span>👥</span> {currentOpportunity.lead.guestCount ? `${currentOpportunity.lead.guestCount} guests` : "Not specified"}
+            </p>
+          </div>
+
+          <div className="bg-zinc-950/70 border border-zinc-800/80 rounded-xl p-4">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Budget Range</span>
+            <p className="text-sm font-bold text-amber-400 font-mono mt-1 flex items-center gap-1.5">
+              <span>💰</span> {currentOpportunity.lead.budget ? (isNaN(Number(currentOpportunity.lead.budget)) ? currentOpportunity.lead.budget : `₹${Number(currentOpportunity.lead.budget).toLocaleString("en-IN")}`) : "Not specified"}
+            </p>
+          </div>
+        </div>
+
+        {/* Services Requested */}
+        {currentOpportunity.lead.services.length > 0 && (
+          <div className="bg-zinc-950/60 border border-zinc-800/80 rounded-xl p-5 space-y-3">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+              Services Requested by Client ({currentOpportunity.lead.services.length})
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {currentOpportunity.lead.services.map((svc) => (
+                <span
+                  key={svc}
+                  className="px-3.5 py-1.5 bg-zinc-900 border border-zinc-700/80 text-amber-300 font-semibold text-xs rounded-xl shadow-sm"
+                >
+                  ✓ {svc}
+                </span>
               ))}
-            </ul>
+            </div>
           </div>
         )}
-        {currentOpportunity.lead.budget && (
-          <p className="text-sm text-zinc-400">Budget: {currentOpportunity.lead.budget}</p>
+
+        {/* Status Banners & Actions */}
+        {expired && !canRespond && currentOpportunity.status !== "INTERESTED" && currentOpportunity.status !== "DECLINED" && (
+          <div className="bg-zinc-950/80 border border-zinc-800 rounded-xl p-4 text-xs text-zinc-400 font-medium flex items-center gap-2">
+            <span>⏳</span> This opportunity has expired. No further actions can be taken.
+          </div>
         )}
-      </div>
 
-      {expired && !canRespond && currentOpportunity.status !== "INTERESTED" && currentOpportunity.status !== "DECLINED" && (
-        <p className="text-sm text-zinc-500">This opportunity has expired.</p>
-      )}
+        {canRespond && (
+          <div className="pt-2 border-t border-zinc-800">
+            <OpportunityActions opportunityId={currentOpportunity.id} />
+          </div>
+        )}
 
-      {canRespond && <OpportunityActions opportunityId={currentOpportunity.id} />}
+        {QUOTE_LINK_LABEL[currentOpportunity.status] && (
+          <div className="pt-2 border-t border-zinc-800">
+            <Link
+              href={`/vendor/dashboard/opportunities/${currentOpportunity.id}/quote`}
+              className="inline-flex items-center gap-2 px-5 py-3 bg-amber-400 hover:bg-amber-300 text-zinc-950 font-bold text-xs rounded-xl transition-all shadow-lg shadow-amber-400/10"
+            >
+              <span>{QUOTE_LINK_LABEL[currentOpportunity.status]}</span>
+              <span>→</span>
+            </Link>
+          </div>
+        )}
 
-      {!canRespond && !expired && (
-        <div className="mb-3">
-          <StatusBadge
-            label={STATUS_LABEL[currentOpportunity.status]?.label ?? currentOpportunity.status}
-            tone={STATUS_LABEL[currentOpportunity.status]?.tone ?? "zinc"}
-          />
+        {/* Portfolio / Brochure Tip Footer */}
+        <div className="pt-4 border-t border-zinc-800/80 text-xs text-zinc-400 leading-relaxed bg-zinc-950/40 p-4 rounded-xl border border-zinc-800/50">
+          💡 Have a portfolio photo or PDF brochure ready?{" "}
+          <Link href="/vendor/dashboard/edit" className="text-amber-400 font-semibold underline hover:text-amber-300">
+            Add it to your profile once
+          </Link>{" "}
+          — it&apos;s shown automatically wherever clients view your quotes, no need to re-upload for every single lead.
         </div>
-      )}
-
-      {QUOTE_LINK_LABEL[currentOpportunity.status] && (
-        <Link
-          href={`/vendor/dashboard/opportunities/${currentOpportunity.id}/quote`}
-          className="inline-block text-sm text-zinc-400 underline hover:text-zinc-200"
-        >
-          {QUOTE_LINK_LABEL[currentOpportunity.status]}
-        </Link>
-      )}
-
-      <p className="mt-4 pt-4 border-t border-zinc-800 text-xs text-zinc-500">
-        Have a portfolio or brochure ready?{" "}
-        <Link href="/vendor/dashboard/edit" className="underline hover:text-zinc-300">
-          Add it to your profile once
-        </Link>{" "}
-        — it&apos;s shown automatically wherever customers see your quotes, no need to
-        re-upload it here.
-      </p>
+      </div>
     </div>
   );
 }

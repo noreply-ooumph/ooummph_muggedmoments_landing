@@ -136,78 +136,83 @@ export default function VendorAuthPage() {
         )}
 
         {step === "register" && (
-          <form onSubmit={handleRegister} className="space-y-4">
-            <p className="text-sm text-zinc-400">
-              We don&apos;t recognize this number yet — let&apos;s set up your vendor profile.
-            </p>
-            <div>
-              <label className="block text-sm text-zinc-400 mb-1">Business name</label>
-              <input
-                type="text"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-md bg-zinc-800 border border-zinc-700 px-3 py-2 text-zinc-100"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-zinc-400 mb-1">City</label>
-              <input
-                type="text"
-                required
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="w-full rounded-md bg-zinc-800 border border-zinc-700 px-3 py-2 text-zinc-100"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-zinc-400 mb-2">Services you offer</label>
-              <div className="grid grid-cols-2 gap-2">
-                {activeServices.map((s) => (
-                  <label key={s.slug} className="flex items-center gap-2 text-sm text-zinc-300">
-                    <input
-                      type="checkbox"
-                      checked={selectedServices.includes(s.slug)}
-                      onChange={() => toggleService(s.slug)}
-                    />
-                    {s.name}
-                  </label>
-                ))}
+          <>
+            <form onSubmit={handleRegister} className="space-y-4">
+              <p className="text-sm text-zinc-400">
+                We don&apos;t recognize this number yet — let&apos;s set up your vendor profile.
+              </p>
+              <div>
+                <label className="block text-sm text-zinc-400 mb-1 font-medium">Business name</label>
+                <input
+                  type="text"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full rounded-xl bg-zinc-800/90 border border-zinc-700 px-4 py-2.5 text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition-all"
+                  placeholder="e.g. Royal Wedding Photography"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-zinc-400 mb-1 font-medium">City</label>
+                <input
+                  type="text"
+                  required
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="w-full rounded-xl bg-zinc-800/90 border border-zinc-700 px-4 py-2.5 text-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition-all"
+                  placeholder="e.g. Lucknow"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-zinc-400 mb-2 font-medium">Services you offer</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {activeServices.map((s) => (
+                    <label key={s.slug} className="flex items-center gap-2.5 text-xs text-zinc-200 bg-zinc-800/60 border border-zinc-700/60 p-2.5 rounded-xl hover:border-amber-500/40 cursor-pointer transition-all">
+                      <input
+                        type="checkbox"
+                        checked={selectedServices.includes(s.slug)}
+                        onChange={() => toggleService(s.slug)}
+                        className="accent-amber-500 rounded"
+                      />
+                      <span>{s.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <button
+                type="submit"
+                disabled={submitting || selectedServices.length === 0}
+                className="w-full rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-zinc-950 font-bold py-3 text-sm disabled:opacity-50 transition-all shadow-md shadow-amber-400/10"
+              >
+                {submitting ? "Creating account..." : "Create vendor account"}
+              </button>
+            </form>
+
+            {/* Catchy WhatsApp Community Section - Only shown on Create Your Vendor Account step */}
+            <div className="mt-6 pt-6 border-t border-zinc-800/80 text-center">
+              <div className="bg-gradient-to-r from-emerald-950/50 via-emerald-900/30 to-emerald-950/50 border border-emerald-500/40 rounded-xl p-4 shadow-xl">
+                <div className="flex items-center justify-center gap-2 mb-1.5">
+                  <span className="text-xl">💬</span>
+                  <h3 className="text-sm font-bold text-emerald-300 tracking-tight">
+                    Join Official Vendor WhatsApp Network
+                  </h3>
+                </div>
+                <p className="text-xs text-zinc-300 mb-3.5 leading-relaxed">
+                  ⚡ Get instant client lead alerts, priority booking updates, and connect with top event partners in your region!
+                </p>
+                <a
+                  href="https://chat.whatsapp.com/D7TWeA4gF2cBHaXbzXF7Qi"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-xs rounded-lg transition-all shadow-md shadow-emerald-500/20"
+                >
+                  <span>Join WhatsApp Group Now</span>
+                  <span>→</span>
+                </a>
               </div>
             </div>
-            <button
-              type="submit"
-              disabled={submitting || selectedServices.length === 0}
-              className="w-full rounded-md bg-white text-zinc-900 font-medium py-2 disabled:opacity-50"
-            >
-              {submitting ? "Creating account..." : "Create vendor account"}
-            </button>
-          </form>
+          </>
         )}
-
-        {/* Catchy WhatsApp Community Section */}
-        <div className="mt-6 pt-6 border-t border-zinc-800/80 text-center">
-          <div className="bg-gradient-to-r from-emerald-950/50 via-emerald-900/30 to-emerald-950/50 border border-emerald-500/40 rounded-xl p-4 shadow-xl">
-            <div className="flex items-center justify-center gap-2 mb-1.5">
-              <span className="text-xl">💬</span>
-              <h3 className="text-sm font-bold text-emerald-300 tracking-tight">
-                Join Official Vendor WhatsApp Network
-              </h3>
-            </div>
-            <p className="text-xs text-zinc-300 mb-3.5 leading-relaxed">
-              ⚡ Get instant client lead alerts, priority booking updates, and connect with top event partners in your region!
-            </p>
-            <a
-              href="https://chat.whatsapp.com/D7TWeA4gF2cBHaXbzXF7Qi"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-xs rounded-lg transition-all shadow-md shadow-emerald-500/20"
-            >
-              <span>Join WhatsApp Group Now</span>
-              <span>→</span>
-            </a>
-          </div>
-        </div>
       </div>
     </div>
   );
