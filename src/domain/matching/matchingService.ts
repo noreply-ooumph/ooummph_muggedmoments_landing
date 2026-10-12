@@ -111,8 +111,10 @@ export function evaluateCompatibility(
     }
   }
 
-  // All active vendors are eligible to match with all customer lead requests without filtering by city or money/budget.
-  const eligible = vendor.active;
+  const eligible =
+    vendor.active &&
+    matchCount >= minimumMatchCount &&
+    !reasons.includes(MATCHING_REASONS.CITY_MISMATCH);
   return { eligible, reasons };
 }
 

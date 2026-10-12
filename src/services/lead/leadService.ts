@@ -360,6 +360,8 @@ export async function createLead(
           customerName: input.customerName.trim(),
           phone: input.phone.trim(),
           whatsappConsent: input.whatsappConsent,
+          preferredMeetingDate: input.preferredMeetingDate ? new Date(input.preferredMeetingDate) : null,
+          preferredMeetingTime: input.preferredMeetingTime?.trim() || null,
           dynamicAnswers: (input.dynamicAnswers ?? {}) as Prisma.InputJsonValue,
           status: "SUBMITTED",
           completenessStatus: "PENDING",
@@ -781,6 +783,8 @@ export async function getLeadByPublicId(
   bookingRequests: PublicBookingRequest[];
   bookings: PublicBooking[];
   whatsappConsent: boolean;
+  preferredMeetingDate?: string;
+  preferredMeetingTime?: string;
 } | null> {
   const lead = await prisma.lead.findUnique({
     where: { publicLeadId },
@@ -799,6 +803,8 @@ export async function getLeadByPublicId(
       services: true,
       createdAt: true,
       whatsappConsent: true,
+      preferredMeetingDate: true,
+      preferredMeetingTime: true,
       qualification: true,
       matches: {
         include: {
@@ -939,6 +945,8 @@ export async function getLeadByPublicId(
     // catalog, rather than silently dropping it from what the customer sees
     // they asked for.
     services: lead.services.map((slug) => findServiceBySlug(slug)?.name ?? slug),
+    preferredMeetingDate: lead.preferredMeetingDate?.toISOString(),
+    preferredMeetingTime: lead.preferredMeetingTime ?? undefined,
     createdAt: lead.createdAt.toISOString(),
     qualificationStatus: lead.qualification?.status ?? "CAPTURED",
     missingFields: lead.qualification?.missingFields ?? [],
@@ -1226,6 +1234,8 @@ export async function listLeadsForAdmin(): Promise<
     city: string;
     status: string;
     qualificationStatus: string;
+    preferredMeetingDate: string | null;
+    preferredMeetingTime: string | null;
     createdAt: string;
   }[]
 > {
@@ -1237,6 +1247,8 @@ export async function listLeadsForAdmin(): Promise<
       city: true,
       status: true,
       createdAt: true,
+      preferredMeetingDate: true,
+      preferredMeetingTime: true,
       eventType: { select: { name: true } },
       customEventTypeName: true,
       qualification: { select: { status: true } },
@@ -1252,6 +1264,8 @@ export async function listLeadsForAdmin(): Promise<
     city: lead.city,
     status: lead.status,
     qualificationStatus: lead.qualification?.status ?? "CAPTURED",
+    preferredMeetingDate: lead.preferredMeetingDate ? lead.preferredMeetingDate.toISOString() : null,
+    preferredMeetingTime: lead.preferredMeetingTime ?? null,
     createdAt: lead.createdAt.toISOString(),
   }));
 }
@@ -1274,6 +1288,8 @@ export interface AdminLeadDetail {
   emailOptIn: boolean;
   smsOptIn: boolean;
   dynamicAnswers: Record<string, unknown> | null;
+  preferredMeetingDate: string | null;
+  preferredMeetingTime: string | null;
   createdAt: string;
 }
 
@@ -1320,6 +1336,8 @@ export async function getLeadDetailForAdmin(
     emailOptIn: lead.emailOptIn,
     smsOptIn: lead.smsOptIn,
     dynamicAnswers: lead.dynamicAnswers as Record<string, unknown> | null,
+    preferredMeetingDate: lead.preferredMeetingDate ? lead.preferredMeetingDate.toISOString() : null,
+    preferredMeetingTime: lead.preferredMeetingTime ?? null,
     createdAt: lead.createdAt.toISOString(),
   };
 }

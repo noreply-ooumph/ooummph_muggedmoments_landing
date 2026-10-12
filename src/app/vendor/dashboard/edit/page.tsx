@@ -14,7 +14,7 @@ import { EditProfileClient } from "./EditProfileClient";
 export default async function VendorEditProfilePage() {
   const session = await getVendorSession();
   if (!session) {
-    redirect("/vendor");
+    redirect("/join-as-vendor");
   }
 
   const vendor = await prisma.vendor.findUnique({
@@ -27,7 +27,7 @@ export default async function VendorEditProfilePage() {
   });
 
   if (!vendor) {
-    redirect("/vendor");
+    redirect("/join-as-vendor");
   }
 
   return (

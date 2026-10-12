@@ -39,7 +39,7 @@ export default async function VendorBookingRequestDetailPage({
 }) {
   const session = await getVendorSession();
   if (!session) {
-    redirect("/vendor");
+    redirect("/join-as-vendor");
   }
 
   const { bookingRequestId } = await params;

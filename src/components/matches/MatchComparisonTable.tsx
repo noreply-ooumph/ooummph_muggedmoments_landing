@@ -26,7 +26,7 @@ export function MatchComparisonTable({ matches }: MatchComparisonTableProps) {
   return (
     <div className="mb-4">
       <h3 className="text-sm font-semibold text-zinc-300 uppercase tracking-wider mb-2">
-        Compare Vendors
+        Vendors matching your requirements
       </h3>
       <div className="overflow-x-auto rounded-xl border border-zinc-800">
         <table className="w-full text-sm bg-zinc-950/80">

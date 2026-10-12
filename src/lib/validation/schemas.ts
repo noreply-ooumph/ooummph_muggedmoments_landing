@@ -119,6 +119,9 @@ const CreateLeadObjectSchema = z.object({
     message: "WhatsApp consent field is required.",
   }),
 
+  preferredMeetingDate: z.string().optional(),
+  preferredMeetingTime: z.string().optional(),
+
   attribution: AttributionSchema.optional(),
 
   // Per-question validation happens server-side against the live Question catalog
@@ -174,6 +177,11 @@ export const Step6Schema = CreateLeadObjectSchema.pick({
   whatsappConsent: true,
 });
 
+export const Step7MeetingSchema = CreateLeadObjectSchema.pick({
+  preferredMeetingDate: true,
+  preferredMeetingTime: true,
+});
+
 export const StepSchemas = [
   Step1Schema,
   Step2Schema,
@@ -181,6 +189,7 @@ export const StepSchemas = [
   Step4Schema,
   Step5Schema,
   Step6Schema,
+  Step7MeetingSchema,
 ] as const;
 
 // ============================================================

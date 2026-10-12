@@ -48,6 +48,7 @@ export default async function AdminLeadsPage() {
               <th className="px-4 py-2 font-medium">City</th>
               <th className="px-4 py-2 font-medium">Status</th>
               <th className="px-4 py-2 font-medium">Qualification</th>
+              <th className="px-4 py-2 font-medium">Rep. Consultation</th>
               <th className="px-4 py-2 font-medium">Created</th>
             </tr>
           </thead>
@@ -71,6 +72,15 @@ export default async function AdminLeadsPage() {
                 <td className="px-4 py-2 text-zinc-400">{lead.city}</td>
                 <td className="px-4 py-2 text-zinc-400">{lead.status}</td>
                 <td className="px-4 py-2 text-zinc-400">{lead.qualificationStatus}</td>
+                <td className="px-4 py-2 text-xs">
+                  {lead.preferredMeetingDate || lead.preferredMeetingTime ? (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                      📅 {lead.preferredMeetingDate ? new Date(lead.preferredMeetingDate).toLocaleDateString("en-IN", { month: "short", day: "numeric" }) : ""}{lead.preferredMeetingTime ? ` at ${lead.preferredMeetingTime}` : ""}
+                    </span>
+                  ) : (
+                    <span className="text-zinc-500">—</span>
+                  )}
+                </td>
                 <td className="px-4 py-2 text-zinc-400">
                   {new Date(lead.createdAt).toLocaleString()}
                 </td>

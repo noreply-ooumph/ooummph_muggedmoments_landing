@@ -45,7 +45,7 @@ export default async function VendorOpportunityDetailPage({
 }) {
   const session = await getVendorSession();
   if (!session) {
-    redirect("/vendor");
+    redirect("/join-as-vendor");
   }
 
   const { opportunityId } = await params;

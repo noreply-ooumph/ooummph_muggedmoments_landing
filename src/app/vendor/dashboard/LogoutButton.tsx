@@ -2,8 +2,13 @@
 
 export function LogoutButton() {
   async function handleLogout() {
-    await fetch("/api/vendor/logout", { method: "POST" });
-    window.location.href = "/vendor";
+    try {
+      await fetch("/api/vendor/logout", { method: "POST" });
+    } catch {
+      // Ignore network errors on logout
+    } finally {
+      window.location.replace("/join-as-vendor");
+    }
   }
 
   return (

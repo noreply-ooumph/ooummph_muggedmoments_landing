@@ -105,6 +105,8 @@ model Lead {
   emailOptIn      Boolean   @default(false) @map("email_opt_in")
   smsOptIn        Boolean   @default(false) @map("sms_opt_in")
   dynamicAnswers  Json?     @map("dynamic_answers") // { [questionKey]: answer } — see Question model
+  preferredMeetingDate DateTime? @map("preferred_meeting_date")
+  preferredMeetingTime String?   @map("preferred_meeting_time")
 
   // Lifecycle
   status             LeadStatus         @default(SUBMITTED)

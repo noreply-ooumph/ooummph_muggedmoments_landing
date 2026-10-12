@@ -225,121 +225,161 @@ export function EditProfileClient({
   }
 
   return (
-    <div className="w-full max-w-md mx-auto p-8 bg-zinc-900/80 backdrop-blur-md rounded-xl border border-zinc-800">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-semibold text-zinc-100">Edit Profile</h1>
-        <Link href="/vendor/dashboard" className="text-sm text-zinc-400 underline hover:text-zinc-200">
-          Back
+    <div className="w-full space-y-8">
+      {/* Header Bar */}
+      <div className="bg-zinc-900/70 border border-zinc-800/80 rounded-2xl p-6 sm:p-8 backdrop-blur-md shadow-2xl flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Edit Vendor Profile</h1>
+          <p className="text-xs text-zinc-400 mt-1">
+            Update your business details, services offered, starting pricing, and portfolio items.
+          </p>
+        </div>
+        <Link
+          href="/vendor/dashboard"
+          className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-semibold text-xs rounded-xl transition-colors border border-zinc-700/60"
+        >
+          ← Back to Dashboard
         </Link>
       </div>
 
       {saved && (
-        <div className="mb-4 text-sm text-emerald-400 bg-emerald-950/40 border border-emerald-900 rounded-md p-3">
-          Saved. Profile is currently marked as{" "}
-          {profileComplete ? "complete" : "incomplete"}.
+        <div className="text-sm font-semibold text-emerald-400 bg-emerald-950/40 border border-emerald-500/30 rounded-2xl p-4 shadow-lg flex items-center gap-2">
+          <span>✓</span>
+          <span>Profile saved successfully. Status is currently marked as <strong className="underline">{profileComplete ? "Complete (Ready for Matching)" : "Incomplete"}</strong>.</span>
         </div>
       )}
 
       {error && (
-        <div className="mb-4 text-sm text-red-400 bg-red-950/40 border border-red-900 rounded-md p-3">
-          {error}
+        <div className="text-sm font-semibold text-red-400 bg-red-950/40 border border-red-500/30 rounded-2xl p-4 shadow-lg flex items-center gap-2">
+          <span>⚠️</span>
+          <span>{error}</span>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm text-zinc-400 mb-1">Business name</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-md bg-zinc-800 border border-zinc-700 px-3 py-2 text-zinc-100"
-          />
-          {fieldErrors.name && (
-            <p className="text-xs text-red-400 mt-1">{fieldErrors.name}</p>
-          )}
-        </div>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Section 1: Business Identity */}
+        <div className="bg-zinc-900/70 border border-zinc-800/80 rounded-2xl p-6 backdrop-blur-md shadow-xl space-y-5">
+          <h2 className="text-base font-bold text-white border-b border-zinc-800 pb-3 flex items-center gap-2">
+            <span>🏢</span> Business Information
+          </h2>
 
-        <div>
-          <label className="block text-sm text-zinc-400 mb-1">City</label>
-          <input
-            type="text"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            className="w-full rounded-md bg-zinc-800 border border-zinc-700 px-3 py-2 text-zinc-100"
-          />
-          {fieldErrors.city && (
-            <p className="text-xs text-red-400 mt-1">{fieldErrors.city}</p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm text-zinc-400 mb-2">Services you offer</label>
-          <div className="grid grid-cols-2 gap-2">
-            {activeServices.map((s) => (
-              <label key={s.slug} className="flex items-center gap-2 text-sm text-zinc-300">
-                <input
-                  type="checkbox"
-                  checked={services.includes(s.slug)}
-                  onChange={() => toggleService(s.slug)}
-                />
-                {s.name}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">
+                Business Name
               </label>
-            ))}
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full rounded-xl bg-zinc-950/80 border border-zinc-800 focus:border-amber-400 focus:ring-1 focus:ring-amber-400/30 px-4 py-2.5 text-zinc-100 text-sm transition-all"
+              />
+              {fieldErrors.name && (
+                <p className="text-xs text-red-400 mt-1">{fieldErrors.name}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">
+                Primary City
+              </label>
+              <input
+                type="text"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                className="w-full rounded-xl bg-zinc-950/80 border border-zinc-800 focus:border-amber-400 focus:ring-1 focus:ring-amber-400/30 px-4 py-2.5 text-zinc-100 text-sm transition-all"
+              />
+              {fieldErrors.city && (
+                <p className="text-xs text-red-400 mt-1">{fieldErrors.city}</p>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">
+              Starting Price (INR)
+            </label>
+            <div className="relative max-w-xs">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 text-sm font-bold">₹</span>
+              <input
+                type="number"
+                min={0}
+                value={startingPrice}
+                onChange={(e) => setStartingPrice(e.target.value)}
+                className="w-full rounded-xl bg-zinc-950/80 border border-zinc-800 focus:border-amber-400 focus:ring-1 focus:ring-amber-400/30 pl-8 pr-4 py-2.5 text-zinc-100 text-sm transition-all font-mono"
+                placeholder="25000"
+              />
+            </div>
+            {fieldErrors.startingPrice && (
+              <p className="text-xs text-red-400 mt-1">{fieldErrors.startingPrice}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Section 2: Services Selection */}
+        <div className="bg-zinc-900/70 border border-zinc-800/80 rounded-2xl p-6 backdrop-blur-md shadow-xl space-y-4">
+          <h2 className="text-base font-bold text-white border-b border-zinc-800 pb-3 flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <span>🛠️</span> Services You Offer
+            </span>
+            <span className="text-xs text-zinc-500 font-normal">
+              Select all that apply
+            </span>
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {activeServices.map((s) => {
+              const selected = services.includes(s.slug);
+              return (
+                <button
+                  type="button"
+                  key={s.slug}
+                  onClick={() => toggleService(s.slug)}
+                  className={`p-3.5 rounded-xl border text-left transition-all duration-200 flex items-center justify-between ${
+                    selected
+                      ? "bg-amber-500/10 border-amber-500/40 text-amber-300 shadow-md shadow-amber-500/5"
+                      : "bg-zinc-950/60 border-zinc-800/80 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+                  }`}
+                >
+                  <span className="text-sm font-semibold">{s.name}</span>
+                  <span
+                    className={`w-5 h-5 rounded-md flex items-center justify-center text-xs font-bold transition-all ${
+                      selected
+                        ? "bg-amber-400 text-zinc-950"
+                        : "bg-zinc-800 text-zinc-600 border border-zinc-700"
+                    }`}
+                  >
+                    {selected ? "✓" : ""}
+                  </span>
+                </button>
+              );
+            })}
           </div>
           {fieldErrors.services && (
             <p className="text-xs text-red-400 mt-1">{fieldErrors.services}</p>
           )}
-          <p className="text-xs text-zinc-500 mt-2">
-            Changes to city or services here only affect matching for new requests
-            submitted after you save — they don&apos;t retroactively change any
-            opportunity or match you already have.
+          <p className="text-xs text-zinc-500 bg-zinc-950/50 p-3 rounded-xl border border-zinc-800/60">
+            ℹ️ Changes to city or services here only affect matching for new requests submitted after you save — they don&apos;t retroactively change any opportunity or match you already have.
           </p>
         </div>
 
-        <div>
-          <label className="block text-sm text-zinc-400 mb-1">About</label>
-          <textarea
-            value={about}
-            onChange={(e) => setAbout(e.target.value)}
-            rows={4}
-            maxLength={2000}
-            className="w-full rounded-md bg-zinc-800 border border-zinc-700 px-3 py-2 text-zinc-100"
-            placeholder="Tell customers about your business..."
-          />
-          {fieldErrors.about && (
-            <p className="text-xs text-red-400 mt-1">{fieldErrors.about}</p>
-          )}
-        </div>
+        {/* Section 3: Service Coverage Areas */}
+        <div className="bg-zinc-900/70 border border-zinc-800/80 rounded-2xl p-6 backdrop-blur-md shadow-xl space-y-4">
+          <h2 className="text-base font-bold text-white border-b border-zinc-800 pb-3 flex items-center gap-2">
+            <span>🗺️</span> Service Coverage Areas
+          </h2>
 
-        <div>
-          <label className="block text-sm text-zinc-400 mb-1">Starting price (INR)</label>
-          <input
-            type="number"
-            min={0}
-            value={startingPrice}
-            onChange={(e) => setStartingPrice(e.target.value)}
-            className="w-full rounded-md bg-zinc-800 border border-zinc-700 px-3 py-2 text-zinc-100"
-            placeholder="25000"
-          />
-          {fieldErrors.startingPrice && (
-            <p className="text-xs text-red-400 mt-1">{fieldErrors.startingPrice}</p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm text-zinc-400 mb-2">Service areas</label>
           <div className="flex flex-wrap gap-2 mb-2">
             {serviceAreas.map((area) => (
               <span
                 key={area}
-                className="inline-flex items-center gap-1 text-sm bg-zinc-800 border border-zinc-700 rounded-md px-2 py-1 text-zinc-200"
+                className="inline-flex items-center gap-2 text-xs font-semibold bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-1.5 text-amber-300"
               >
-                {area}
+                <span>📍 {area}</span>
                 <button
                   type="button"
                   onClick={() => removeServiceArea(area)}
-                  className="text-zinc-500 hover:text-zinc-300"
+                  className="text-zinc-500 hover:text-red-400 text-base leading-none"
                   aria-label={`Remove ${area}`}
                 >
                   ×
@@ -347,7 +387,8 @@ export function EditProfileClient({
               </span>
             ))}
           </div>
-          <div className="flex gap-2">
+
+          <div className="flex gap-2 max-w-md">
             <input
               type="text"
               value={newArea}
@@ -358,15 +399,15 @@ export function EditProfileClient({
                   addServiceArea();
                 }
               }}
-              className="flex-1 rounded-md bg-zinc-800 border border-zinc-700 px-3 py-2 text-zinc-100"
-              placeholder="Add a city or area"
+              className="flex-1 rounded-xl bg-zinc-950/80 border border-zinc-800 focus:border-amber-400 px-4 py-2 text-zinc-100 text-xs"
+              placeholder="Add a city or local area..."
             />
             <button
               type="button"
               onClick={addServiceArea}
-              className="rounded-md bg-zinc-700 text-zinc-100 px-3 py-2 text-sm"
+              className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-100 font-semibold text-xs border border-zinc-700/60"
             >
-              Add
+              Add Area
             </button>
           </div>
           {fieldErrors.serviceAreas && (
@@ -374,39 +415,67 @@ export function EditProfileClient({
           )}
         </div>
 
+        {/* Section 4: About Description */}
+        <div className="bg-zinc-900/70 border border-zinc-800/80 rounded-2xl p-6 backdrop-blur-md shadow-xl space-y-4">
+          <h2 className="text-base font-bold text-white border-b border-zinc-800 pb-3 flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <span>📝</span> Business Overview
+            </span>
+            <span className="text-xs text-zinc-500 font-mono">
+              {about.length} / 2000 chars
+            </span>
+          </h2>
+
+          <textarea
+            value={about}
+            onChange={(e) => setAbout(e.target.value)}
+            rows={4}
+            maxLength={2000}
+            className="w-full rounded-xl bg-zinc-950/80 border border-zinc-800 focus:border-amber-400 focus:ring-1 focus:ring-amber-400/30 p-4 text-zinc-100 text-sm leading-relaxed"
+            placeholder="Tell potential clients about your experience, style, equipment, and values..."
+          />
+          {fieldErrors.about && (
+            <p className="text-xs text-red-400 mt-1">{fieldErrors.about}</p>
+          )}
+        </div>
+
+        {/* Submit Profile Button */}
         <button
           type="submit"
           disabled={submitting}
-          className="w-full rounded-md bg-white text-zinc-900 font-medium py-2 disabled:opacity-50"
+          className="w-full py-3.5 bg-amber-400 hover:bg-amber-300 text-zinc-950 font-bold text-sm rounded-xl transition-all shadow-xl shadow-amber-400/10 disabled:opacity-50"
         >
-          {submitting ? "Saving..." : "Save profile"}
+          {submitting ? "Saving Changes..." : "Save Profile Changes"}
         </button>
       </form>
 
-      <div className="mt-8 pt-6 border-t border-zinc-800">
-        <label className="block text-sm text-zinc-400 mb-2">
-          Portfolio ({portfolioItems.length}/{MAX_PORTFOLIO_ITEMS})
-        </label>
+      {/* Section 5: Portfolio Showcase Upload */}
+      <div className="bg-zinc-900/70 border border-zinc-800/80 rounded-2xl p-6 backdrop-blur-md shadow-xl space-y-4">
+        <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+          <h2 className="text-base font-bold text-white flex items-center gap-2">
+            <span>📸</span> Portfolio Photos ({portfolioItems.length}/{MAX_PORTFOLIO_ITEMS})
+          </h2>
+        </div>
 
         {portfolioError && (
-          <div className="mb-3 text-sm text-red-400 bg-red-950/40 border border-red-900 rounded-md p-3">
+          <div className="text-xs font-semibold text-red-400 bg-red-950/40 border border-red-500/30 rounded-xl p-3">
             {portfolioError}
           </div>
         )}
 
-        <div className="grid grid-cols-3 gap-2 mb-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
           {portfolioItems.map((item) => (
-            <div key={item.id} className="relative aspect-square">
+            <div key={item.id} className="relative aspect-square group rounded-xl overflow-hidden border border-zinc-800">
               {/* eslint-disable-next-line @next/next/no-img-element -- local disk-served static path, not an optimizable remote image */}
               <img
                 src={item.imagePath}
                 alt="Portfolio"
-                className="w-full h-full object-cover rounded-md border border-zinc-700"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
               />
               <button
                 type="button"
                 onClick={() => handleRemovePortfolioItem(item.id)}
-                className="absolute top-1 right-1 bg-zinc-950/80 text-zinc-200 rounded-full w-6 h-6 text-sm leading-none hover:bg-red-950"
+                className="absolute top-1.5 right-1.5 bg-zinc-950/90 text-zinc-200 rounded-full w-6 h-6 text-sm font-bold flex items-center justify-center hover:bg-red-900 hover:text-white transition-colors"
                 aria-label="Remove image"
               >
                 ×
@@ -420,53 +489,55 @@ export function EditProfileClient({
             You&apos;ve reached the maximum of {MAX_PORTFOLIO_ITEMS} images. Remove one to add another.
           </p>
         ) : (
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            disabled={uploading}
-            onChange={handleUploadPortfolioItem}
-            className="block w-full text-sm text-zinc-400 file:mr-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-zinc-100 file:px-3 file:py-2 disabled:opacity-50"
-          />
+          <div className="pt-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              disabled={uploading}
+              onChange={handleUploadPortfolioItem}
+              className="block w-full text-xs text-zinc-400 file:mr-4 file:rounded-xl file:border-0 file:bg-zinc-800 file:text-amber-400 file:px-4 file:py-2.5 file:font-semibold hover:file:bg-zinc-700 disabled:opacity-50"
+            />
+          </div>
         )}
       </div>
 
-      <div className="mt-8 pt-6 border-t border-zinc-800">
-        <label className="block text-sm text-zinc-400 mb-2">
-          Brochure / Documents ({documents.length}/{MAX_DOCUMENTS})
-        </label>
-        <p className="text-xs text-zinc-500 mb-3">
-          Upload a PDF brochure once and it&apos;s shown on your public profile — customers
-          see your existing work instead of you re-typing every detail into each quote.
-          Documents containing a phone number or email address are rejected automatically
-          so all communication stays through MuggedMoments.
-        </p>
+      {/* Section 6: Document Uploads */}
+      <div className="bg-zinc-900/70 border border-zinc-800/80 rounded-2xl p-6 backdrop-blur-md shadow-xl space-y-4">
+        <div className="border-b border-zinc-800 pb-3">
+          <h2 className="text-base font-bold text-white flex items-center gap-2">
+            <span>📄</span> Brochure / Documents ({documents.length}/{MAX_DOCUMENTS})
+          </h2>
+          <p className="text-xs text-zinc-400 mt-1">
+            Upload a PDF brochure to showcase your menu, packages, or services on your public profile.
+          </p>
+        </div>
 
         {documentError && (
-          <div className="mb-3 text-sm text-red-400 bg-red-950/40 border border-red-900 rounded-md p-3">
+          <div className="text-xs font-semibold text-red-400 bg-red-950/40 border border-red-500/30 rounded-xl p-3">
             {documentError}
           </div>
         )}
 
         {documents.length > 0 && (
-          <ul className="mb-3 space-y-2">
+          <ul className="space-y-2">
             {documents.map((doc) => (
               <li
                 key={doc.id}
-                className="flex items-center justify-between gap-2 text-sm bg-zinc-800 border border-zinc-700 rounded-md px-3 py-2"
+                className="flex items-center justify-between gap-3 text-xs bg-zinc-950/80 border border-zinc-800 rounded-xl px-4 py-3"
               >
                 <a
                   href={doc.filePath}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-zinc-200 truncate underline hover:text-zinc-100"
+                  className="text-amber-400 font-semibold truncate hover:underline flex items-center gap-2"
                 >
-                  {doc.originalFilename || "Document.pdf"}
+                  <span>📎</span> {doc.originalFilename || "Document.pdf"}
                 </a>
                 <button
                   type="button"
                   onClick={() => handleRemoveDocument(doc.id)}
-                  className="text-zinc-500 hover:text-red-400 shrink-0"
+                  className="text-zinc-500 hover:text-red-400 font-bold text-sm shrink-0"
                   aria-label={`Remove ${doc.originalFilename}`}
                 >
                   ×
@@ -478,7 +549,7 @@ export function EditProfileClient({
 
         {documents.length >= MAX_DOCUMENTS ? (
           <p className="text-xs text-zinc-500">
-            You&apos;ve reached the maximum of {MAX_DOCUMENTS} documents. Remove one to add another.
+            You&apos;ve reached the maximum of {MAX_DOCUMENTS} documents.
           </p>
         ) : (
           <input
@@ -487,11 +558,11 @@ export function EditProfileClient({
             accept="application/pdf"
             disabled={uploadingDocument}
             onChange={handleUploadDocument}
-            className="block w-full text-sm text-zinc-400 file:mr-3 file:rounded-md file:border-0 file:bg-zinc-700 file:text-zinc-100 file:px-3 file:py-2 disabled:opacity-50"
+            className="block w-full text-xs text-zinc-400 file:mr-4 file:rounded-xl file:border-0 file:bg-zinc-800 file:text-amber-400 file:px-4 file:py-2.5 file:font-semibold hover:file:bg-zinc-700 disabled:opacity-50"
           />
         )}
         {uploadingDocument && (
-          <p className="text-xs text-zinc-500 mt-2">Scanning and uploading...</p>
+          <p className="text-xs text-amber-400 mt-2">Scanning and uploading document...</p>
         )}
       </div>
     </div>

@@ -23,7 +23,7 @@ export default async function VendorDashboardLayout({
 }) {
   const session = await getVendorSession();
   if (!session) {
-    redirect("/vendor");
+    redirect("/join-as-vendor");
   }
 
   const vendor = await prisma.vendor.findUnique({
@@ -32,7 +32,7 @@ export default async function VendorDashboardLayout({
   });
 
   if (!vendor) {
-    redirect("/vendor");
+    redirect("/join-as-vendor");
   }
 
   const [opportunityCount, bookingRequestCount, meetingCount] = await Promise.all([

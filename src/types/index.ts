@@ -51,6 +51,8 @@ export interface CreateLeadInput {
   customerName: string;
   phone: string;
   whatsappConsent: boolean;
+  preferredMeetingDate?: string;
+  preferredMeetingTime?: string;
   attribution?: Attribution;
   dynamicAnswers?: DynamicAnswerMap;
 }

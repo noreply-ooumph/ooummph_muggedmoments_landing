@@ -32,6 +32,8 @@ interface LeadSuccessData {
   whatsappConsent?: boolean;
   qualificationStatus?: QualificationStatus;
   matches?: PublicVendorMatch[];
+  preferredMeetingDate?: string;
+  preferredMeetingTime?: string;
 }
 
 // Fields the /api/leads/[publicLeadId] PATCH endpoint (Stage 9 resume flow) can
@@ -180,6 +182,26 @@ export function SuccessConfirmation({ data: propData, response, onReset }: Succe
         >
           {copied ? "Copied! ✓" : "Copy Code"}
         </Button>
+      </div>
+
+      {/* Representative Contact Reassurance Box */}
+      <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/30 rounded-xl p-5 mb-6">
+        <div className="flex items-start gap-3">
+          <span className="text-xl">📞</span>
+          <div>
+            <p className="text-base font-bold text-amber-300">
+              Our representative will contact you shortly
+            </p>
+            {data.preferredMeetingDate && data.preferredMeetingTime && (
+              <p className="text-xs text-amber-200/90 mt-1 font-medium">
+                Scheduled Consultation: <span className="font-bold underline">{new Date(data.preferredMeetingDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}</span> at <span className="font-bold underline">{data.preferredMeetingTime}</span>
+              </p>
+            )}
+            <p className="text-xs text-zinc-400 mt-1">
+              Our expert will reach out to guide you through matched vendors and secure your event booking.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Stage 5 Reassurance Timeline */}

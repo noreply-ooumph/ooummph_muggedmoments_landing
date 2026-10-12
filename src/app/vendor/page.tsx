@@ -184,6 +184,30 @@ export default function VendorAuthPage() {
             </button>
           </form>
         )}
+
+        {/* Catchy WhatsApp Community Section */}
+        <div className="mt-6 pt-6 border-t border-zinc-800/80 text-center">
+          <div className="bg-gradient-to-r from-emerald-950/50 via-emerald-900/30 to-emerald-950/50 border border-emerald-500/40 rounded-xl p-4 shadow-xl">
+            <div className="flex items-center justify-center gap-2 mb-1.5">
+              <span className="text-xl">💬</span>
+              <h3 className="text-sm font-bold text-emerald-300 tracking-tight">
+                Join Official Vendor WhatsApp Network
+              </h3>
+            </div>
+            <p className="text-xs text-zinc-300 mb-3.5 leading-relaxed">
+              ⚡ Get instant client lead alerts, priority booking updates, and connect with top event partners in your region!
+            </p>
+            <a
+              href="https://chat.whatsapp.com/D7TWeA4gF2cBHaXbzXF7Qi"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-xs rounded-lg transition-all shadow-md shadow-emerald-500/20"
+            >
+              <span>Join WhatsApp Group Now</span>
+              <span>→</span>
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   );

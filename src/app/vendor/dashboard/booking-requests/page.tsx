@@ -17,7 +17,7 @@ import { BookingRequestListClient } from "./BookingRequestListClient";
 export default async function VendorBookingRequestsPage() {
   const session = await getVendorSession();
   if (!session) {
-    redirect("/vendor");
+    redirect("/join-as-vendor");
   }
 
   const bookingRequests = await prisma.bookingRequest.findMany({
@@ -46,15 +46,25 @@ export default async function VendorBookingRequestsPage() {
   }));
 
   return (
-    <div className="w-full max-w-md mx-auto p-8 bg-zinc-900/80 backdrop-blur-md rounded-xl border border-zinc-800">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-semibold text-zinc-100">Booking Requests</h1>
-        <Link href="/vendor/dashboard" className="text-sm text-zinc-400 underline hover:text-zinc-200">
-          Back
-        </Link>
-      </div>
+    <div className="w-full space-y-6">
+      <div className="bg-zinc-900/70 border border-zinc-800/80 rounded-2xl p-6 sm:p-8 backdrop-blur-md shadow-2xl">
+        <div className="flex items-center justify-between border-b border-zinc-800 pb-4 mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-white tracking-tight">Booking Requests</h1>
+            <p className="text-xs text-zinc-400 mt-1">
+              Customer quote acceptances and direct booking requests awaiting your review
+            </p>
+          </div>
+          <Link
+            href="/vendor/dashboard"
+            className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-medium text-xs rounded-lg transition-colors border border-zinc-700/60"
+          >
+            ← Back to Dashboard
+          </Link>
+        </div>
 
-      <BookingRequestListClient bookingRequests={items} />
+        <BookingRequestListClient bookingRequests={items} />
+      </div>
     </div>
   );
 }

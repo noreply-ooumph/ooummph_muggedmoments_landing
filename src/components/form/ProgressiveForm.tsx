@@ -50,6 +50,7 @@ import {
   Step4Schema,
   Step5Schema,
   Step6Schema,
+  Step7MeetingSchema,
 } from "@/lib/validation/schemas";
 import {
   filterVisibleQuestions,
@@ -58,15 +59,25 @@ import {
 } from "@/domain/dynamicQuestions/dynamicQuestionRules";
 import { track } from "@/lib/analytics";
 
-// Raw internal step-index count. Always 8 regardless of whether the dynamic-questions
+// Raw internal step-index count. Always 9 regardless of whether the dynamic-questions
 // slot (index 5) has anything to show — see `visibleStepCount` for the number actually
 // displayed to the user.
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 9;
 
 // Below this many selected services, the services step offers the suggestion
 // nudge (see getServiceSuggestions()) instead of advancing immediately —
 // never a hard block, always skippable via "Continue Without Adding".
 const SERVICE_NUDGE_MAX_COUNT = 1;
+
+const TIME_SLOT_OPTIONS = [
+  { value: "", label: "Select preferred time slot..." },
+  { value: "10:00 AM", label: "10:00 AM (Morning)" },
+  { value: "11:30 AM", label: "11:30 AM (Late Morning)" },
+  { value: "02:00 PM", label: "02:00 PM (Afternoon)" },
+  { value: "04:00 PM", label: "04:00 PM (Late Afternoon)" },
+  { value: "06:00 PM", label: "06:00 PM (Evening)" },
+  { value: "08:00 PM", label: "08:00 PM (Night)" },
+];
 
 interface ProgressiveFormProps {
   initialEventSlug?: string; // from URL preselection
@@ -237,6 +248,14 @@ export function ProgressiveForm({
             whatsappConsent: values.whatsappConsent ?? false,
           });
           break;
+        case 7:
+          if (values.preferredMeetingDate || values.preferredMeetingTime) {
+            Step7MeetingSchema.parse({
+              preferredMeetingDate: values.preferredMeetingDate,
+              preferredMeetingTime: values.preferredMeetingTime,
+            });
+          }
+          break;
       }
       setErrors({});
       return true;
@@ -340,7 +359,7 @@ export function ProgressiveForm({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!validateStep(6)) return;
+    if (!validateStep(6) || !validateStep(7)) return;
 
     track("form_submit_attempt");
     setIsSubmitting(true);
@@ -365,6 +384,8 @@ export function ProgressiveForm({
           customerName: values.customerName,
           phone: values.phone,
           whatsappConsent: values.whatsappConsent ?? false,
+          preferredMeetingDate: values.preferredMeetingDate,
+          preferredMeetingTime: values.preferredMeetingTime,
           attribution: formState.attribution,
           dynamicAnswers: values.dynamicAnswers ?? {},
         }),
@@ -800,15 +821,49 @@ export function ProgressiveForm({
                   onClick={handleNext}
                   className="flex-1"
                 >
-                  Review →
+                  Next →
                 </Button>
               </div>
             </form>
           </FormStep>
         )}
 
-        {/* STEP 8: Review + Submit */}
+        {/* STEP 8: Representative Consultation Date & Time */}
         {currentStep === 7 && (
+          <FormStep title="⚡ Lock In a Free VIP Consultation with Our Representative!">
+            <p className="text-sm text-white/70 -mt-2 mb-2">
+              Select your preferred date & time slot below so our dedicated event expert can call you directly and fast-track your custom vendor quotes!
+            </p>
+            <div className="flex flex-col gap-4">
+              <Input
+                id="preferred-meeting-date"
+                label="Preferred Consultation Date"
+                type="date"
+                value={values.preferredMeetingDate ?? ""}
+                onChange={(e) => updateValues({ preferredMeetingDate: e.target.value })}
+                error={errors.preferredMeetingDate}
+                min={new Date(Date.now() + 86400000).toISOString().split("T")[0]}
+                autoFocus
+              />
+              <Select
+                id="preferred-meeting-time"
+                label="Preferred Time Slot"
+                options={TIME_SLOT_OPTIONS}
+                value={values.preferredMeetingTime ?? ""}
+                onChange={(e) => updateValues({ preferredMeetingTime: e.target.value })}
+                error={errors.preferredMeetingTime}
+              />
+            </div>
+            <StepNavigation
+              onNext={handleNext}
+              onBack={prevStep}
+              nextLabel="Review Request →"
+            />
+          </FormStep>
+        )}
+
+        {/* STEP 9: Review + Submit */}
+        {currentStep === 8 && (
           <FormStep title="Review your request">
             <div className="flex flex-col gap-3 text-sm">
               <ReviewRow
@@ -869,6 +924,22 @@ export function ProgressiveForm({
               <ReviewRow
                 label="WhatsApp Consent"
                 value={values.whatsappConsent ? "Yes" : "No"}
+              />
+              <ReviewRow
+                label="Representative Callback"
+                value={
+                  values.preferredMeetingDate || values.preferredMeetingTime
+                    ? `${
+                        values.preferredMeetingDate
+                          ? new Date(values.preferredMeetingDate).toLocaleDateString("en-IN", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            })
+                          : "Any Date"
+                      }${values.preferredMeetingTime ? ` at ${values.preferredMeetingTime}` : ""}`
+                    : "Not scheduled"
+                }
               />
               {visibleDynamicQuestions.map((question) => (
                 <ReviewRow

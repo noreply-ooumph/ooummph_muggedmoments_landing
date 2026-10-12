@@ -27,7 +27,7 @@ export default async function VendorQuoteBuilderPage({
 }) {
   const session = await getVendorSession();
   if (!session) {
-    redirect("/vendor");
+    redirect("/join-as-vendor");
   }
 
   const { opportunityId } = await params;

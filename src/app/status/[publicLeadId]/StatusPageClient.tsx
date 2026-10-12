@@ -43,6 +43,8 @@ interface StatusData {
   quotes: PublicQuote[];
   bookingRequests: PublicBookingRequest[];
   bookings: PublicBooking[];
+  preferredMeetingDate?: string;
+  preferredMeetingTime?: string;
 }
 
 // Both bookingRequests and bookings are ordered oldest-first (see
@@ -301,6 +303,26 @@ export function StatusPageClient({ publicLeadId }: { publicLeadId: string }) {
         </span>
         <div className="text-2xl font-mono font-bold text-amber-400 mt-1">
           {data.publicLeadId}
+        </div>
+      </div>
+
+      {/* Representative Contact Reassurance Box */}
+      <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/30 rounded-xl p-5 mb-6">
+        <div className="flex items-start gap-3">
+          <span className="text-xl">📞</span>
+          <div>
+            <p className="text-base font-bold text-amber-300">
+              Our representative will contact you shortly
+            </p>
+            {data.preferredMeetingDate && data.preferredMeetingTime && (
+              <p className="text-xs text-amber-200/90 mt-1 font-medium">
+                Scheduled Consultation: <span className="font-bold underline">{new Date(data.preferredMeetingDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}</span> at <span className="font-bold underline">{data.preferredMeetingTime}</span>
+              </p>
+            )}
+            <p className="text-xs text-zinc-400 mt-1">
+              Our expert will reach out to guide you through matched vendors, clear queries, and secure your event booking.
+            </p>
+          </div>
         </div>
       </div>
 

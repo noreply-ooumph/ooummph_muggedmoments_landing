@@ -275,6 +275,18 @@ export function AdminLeadDetailCard({ initialDetail }: AdminLeadDetailCardProps)
             {detail.services.length > 0 ? detail.services.join(", ") : "None recorded"}
           </span>
         </div>
+        <div className="col-span-2 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+          <span className="text-amber-400 font-bold block text-xs uppercase tracking-wide mb-0.5">
+            📅 Requested Representative Consultation
+          </span>
+          <span className="text-amber-200 text-sm font-semibold">
+            {detail.preferredMeetingDate || detail.preferredMeetingTime ? (
+              `${detail.preferredMeetingDate ? new Date(detail.preferredMeetingDate).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short", year: "numeric" }) : "Any Date"}${detail.preferredMeetingTime ? ` at ${detail.preferredMeetingTime}` : ""}`
+            ) : (
+              "No specific consultation date/time requested"
+            )}
+          </span>
+        </div>
         <div className="col-span-2">
           <span className="text-zinc-500 block text-xs uppercase tracking-wide">Contact Consent</span>
           <span className="text-zinc-100">
