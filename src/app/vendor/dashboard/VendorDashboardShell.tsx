@@ -126,7 +126,43 @@ export function VendorDashboardShell({ vendor, counts, children }: VendorDashboa
         </nav>
       </header>
 
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-8 flex flex-col">{children}</main>
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-8 flex flex-col space-y-6">
+        {/* WhatsApp VIP Community Banner */}
+        <div className="bg-gradient-to-r from-emerald-950/80 via-emerald-900/40 to-emerald-950/80 border border-emerald-500/40 rounded-2xl p-5 sm:p-6 shadow-2xl backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl shrink-0 border border-emerald-500/30 shadow-inner">
+              💬
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase tracking-wider">
+                  Exclusive Partner Network
+                </span>
+                <span className="text-xs text-amber-400 font-semibold animate-pulse">
+                  ⚡ Don&apos;t miss high-converting opportunities!
+                </span>
+              </div>
+              <h2 className="text-base sm:text-lg font-bold text-white tracking-tight mt-1">
+                Haven&apos;t Joined Our Official WhatsApp VIP Group Yet?
+              </h2>
+              <p className="text-xs sm:text-sm text-zinc-300 mt-1 max-w-2xl leading-relaxed">
+                Get instant client lead alerts, priority booking requests, and connect directly with top event planners in your region. Join now so you never miss an opportunity!
+              </p>
+            </div>
+          </div>
+          <a
+            href="https://chat.whatsapp.com/D7TWeA4gF2cBHaXbzXF7Qi"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 text-zinc-950 font-extrabold text-xs sm:text-sm rounded-xl transition-all duration-200 shadow-lg shadow-emerald-500/20 hover:scale-[1.02]"
+          >
+            <span>Join WhatsApp Group Now</span>
+            <span className="text-base">→</span>
+          </a>
+        </div>
+
+        {children}
+      </main>
     </div>
   );
 }
