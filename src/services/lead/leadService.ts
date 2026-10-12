@@ -1351,6 +1351,7 @@ const ADMIN_EDITABLE_FIELDS = [
   "guestCount",
   "budget",
   "services",
+  "status",
 ] as const;
 
 /**
@@ -1400,6 +1401,7 @@ export async function updateLeadDetailsForAdmin(
     guestCount?: number;
     budget?: string;
     services?: string[];
+    status?: "SUBMITTED" | "UNDER_REVIEW" | "MATCHED" | "CLOSED" | "INVALID";
   }
 ): Promise<AdminLeadDetail> {
   const lead = await prisma.lead.findUnique({
@@ -1435,6 +1437,7 @@ export async function updateLeadDetailsForAdmin(
       guestCount: patch.guestCount,
       budget: patch.budget,
       services: patch.services,
+      status: patch.status,
     },
   });
 

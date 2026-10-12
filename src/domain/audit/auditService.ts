@@ -48,7 +48,8 @@ export type AuditAction =
   | "VENDOR_BACKFILL_MATCHING_EXECUTED"
   | "VENDOR_AVAILABILITY_SET"
   | "MEETING_BOOKED"
-  | "MEETING_STATUS_CHANGED";
+  | "MEETING_STATUS_CHANGED"
+  | "LEAD_CALL_LOGGED";
 
 export type AuditActorType = "SYSTEM" | "USER" | "API";
 

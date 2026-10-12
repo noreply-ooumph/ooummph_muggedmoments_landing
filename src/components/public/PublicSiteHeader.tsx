@@ -25,16 +25,16 @@ export function PublicSiteHeader() {
           </span>
         </Link>
 
-        <nav className="flex items-center gap-6 text-xs font-medium text-zinc-400">
-          <Link href="/vendors" className="hover:text-amber-400 transition-colors">
+        <nav className="flex items-center gap-2 sm:gap-6 text-[11px] sm:text-xs font-medium text-zinc-400">
+          <Link href="/vendors" className="hover:text-amber-400 transition-colors hidden sm:inline-block">
             Explore Vendors
           </Link>
-          <Link href="/my-requests" className="hover:text-amber-400 transition-colors">
+          <Link href="/my-requests" className="hover:text-amber-400 transition-colors whitespace-nowrap">
             Check My Status
           </Link>
           <Link
             href="/"
-            className="bg-amber-400 text-zinc-950 hover:bg-amber-300 font-semibold text-xs px-4 py-2 rounded-lg shadow-md shadow-amber-400/10"
+            className="bg-amber-400 text-zinc-950 hover:bg-amber-300 font-bold text-[11px] sm:text-xs px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg shadow-md shadow-amber-400/10 whitespace-nowrap"
           >
             Plan My Event
           </Link>

@@ -17,9 +17,36 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Input, Button, Modal } from "@/components/ui";
 import type { AdminLeadDetail } from "@/services/lead/leadService";
+import type { TimelineEntry } from "@/domain/analytics/funnelService";
 
 interface AdminLeadDetailCardProps {
   initialDetail: AdminLeadDetail;
+  initialTimeline: TimelineEntry[];
+}
+
+type CallStatus = "SCHEDULED" | "CALL_COMPLETED" | "RESCHEDULED" | "NO_ANSWER";
+
+interface CallLogMetadata {
+  callStatus: CallStatus;
+  note: string | null;
+}
+
+function latestCallLog(timeline: TimelineEntry[]): CallLogMetadata | null {
+  // Entries are already sorted oldest-first (see getLeadTimeline), so the
+  // last matching one is the most recent.
+  for (let i = timeline.length - 1; i >= 0; i--) {
+    const entry = timeline[i];
+    if (entry.source === "audit" && entry.label === "LEAD_CALL_LOGGED") {
+      const metadata = entry.metadata as Record<string, unknown> | null;
+      if (metadata && typeof metadata.callStatus === "string") {
+        return {
+          callStatus: metadata.callStatus as CallStatus,
+          note: typeof metadata.note === "string" ? metadata.note : null,
+        };
+      }
+    }
+  }
+  return null;
 }
 
 function toDateInputValue(iso: string | null): string {
@@ -27,7 +54,7 @@ function toDateInputValue(iso: string | null): string {
   return iso.slice(0, 10);
 }
 
-export function AdminLeadDetailCard({ initialDetail }: AdminLeadDetailCardProps) {
+export function AdminLeadDetailCard({ initialDetail, initialTimeline }: AdminLeadDetailCardProps) {
   const router = useRouter();
   const [detail, setDetail] = useState(initialDetail);
   const [editing, setEditing] = useState(false);
@@ -45,6 +72,70 @@ export function AdminLeadDetailCard({ initialDetail }: AdminLeadDetailCardProps)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const lastCallLog = latestCallLog(initialTimeline);
+  const [callStatus, setCallStatus] = useState<CallStatus>(lastCallLog?.callStatus ?? "SCHEDULED");
+  const [adminNotes, setAdminNotes] = useState("");
+  const [lastSavedNote, setLastSavedNote] = useState<string | null>(lastCallLog?.note ?? null);
+  const [savingCallLog, setSavingCallLog] = useState(false);
+  const [callLogError, setCallLogError] = useState<string | null>(null);
+  const [noteSaved, setNoteSaved] = useState(false);
+
+  async function saveCallLog(newCallStatus: CallStatus, note?: string): Promise<boolean> {
+    setSavingCallLog(true);
+    setCallLogError(null);
+    try {
+      const res = await fetch(`/api/internal/leads/${detail.publicLeadId}/call-log`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ callStatus: newCallStatus, note }),
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => null);
+        setCallLogError(json?.error?.message ?? "Could not save. Please try again.");
+        return false;
+      }
+      setCallStatus(newCallStatus);
+      if (note) setLastSavedNote(note);
+      return true;
+    } catch {
+      setCallLogError("Could not reach the server. Please try again.");
+      return false;
+    } finally {
+      setSavingCallLog(false);
+    }
+  }
+
+  async function handleCallStatusChange(newCallStatus: CallStatus) {
+    await saveCallLog(newCallStatus);
+  }
+
+  async function handleLogNote() {
+    const trimmed = adminNotes.trim();
+    if (!trimmed) return;
+    setNoteSaved(false);
+    const ok = await saveCallLog(callStatus, trimmed);
+    if (ok) {
+      setNoteSaved(true);
+      setAdminNotes("");
+    }
+  }
+
+  async function handleStatusChange(newStatus: "SUBMITTED" | "UNDER_REVIEW" | "MATCHED" | "CLOSED" | "INVALID") {
+    try {
+      const res = await fetch(`/api/internal/leads/${detail.publicLeadId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (res.ok) {
+        const json = await res.json();
+        setDetail(json as AdminLeadDetail);
+      }
+    } catch {
+      // Ignore error
+    }
+  }
 
   function startEditing() {
     setCustomerName(detail.customerName);
@@ -265,9 +356,70 @@ export function AdminLeadDetailCard({ initialDetail }: AdminLeadDetailCardProps)
         </div>
         <div>
           <span className="text-zinc-500 block text-xs uppercase tracking-wide">Status</span>
-          <span className="text-zinc-100">
+          <span className="text-zinc-100 font-bold">
             {detail.status} · {detail.completenessStatus} · {detail.qualificationStatus}
           </span>
+        </div>
+        <div className="col-span-2 p-4 bg-zinc-950/90 border border-zinc-800 rounded-xl space-y-2">
+          <span className="text-amber-400 font-bold text-xs uppercase tracking-wider block">
+            ⚡ Admin Stepper Stage Controller (Ticking updates live on customer status page)
+          </span>
+          <p className="text-xs text-zinc-400">
+            Click any stage below to advance or set the customer&apos;s active progress stepper on <span className="text-amber-400 font-mono">/status/{detail.publicLeadId}</span>:
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 pt-1">
+            <button
+              type="button"
+              onClick={() => handleStatusChange("SUBMITTED")}
+              className={`p-2.5 rounded-xl border text-left text-xs font-bold transition-all ${
+                detail.status === "SUBMITTED"
+                  ? "bg-emerald-500 text-zinc-950 border-emerald-400 shadow-md ring-2 ring-emerald-400/50"
+                  : "bg-zinc-900 text-zinc-300 border-zinc-700 hover:border-zinc-500"
+              }`}
+            >
+              <div>Stage 1: Verified</div>
+              <div className="text-[10px] font-normal opacity-80">(SUBMITTED)</div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleStatusChange("UNDER_REVIEW")}
+              className={`p-2.5 rounded-xl border text-left text-xs font-bold transition-all ${
+                detail.status === "UNDER_REVIEW"
+                  ? "bg-amber-400 text-zinc-950 border-amber-300 shadow-md ring-2 ring-amber-400/50"
+                  : "bg-zinc-900 text-zinc-300 border-zinc-700 hover:border-zinc-500"
+              }`}
+            >
+              <div>Stage 2: Consultation</div>
+              <div className="text-[10px] font-normal opacity-80">(UNDER_REVIEW)</div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleStatusChange("MATCHED")}
+              className={`p-2.5 rounded-xl border text-left text-xs font-bold transition-all ${
+                detail.status === "MATCHED"
+                  ? "bg-amber-400 text-zinc-950 border-amber-300 shadow-md ring-2 ring-amber-400/50"
+                  : "bg-zinc-900 text-zinc-300 border-zinc-700 hover:border-zinc-500"
+              }`}
+            >
+              <div>Stage 3: Quotes Studio</div>
+              <div className="text-[10px] font-normal opacity-80">(MATCHED)</div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleStatusChange("CLOSED")}
+              className={`p-2.5 rounded-xl border text-left text-xs font-bold transition-all ${
+                detail.status === "CLOSED"
+                  ? "bg-emerald-500 text-zinc-950 border-emerald-400 shadow-md ring-2 ring-emerald-400/50"
+                  : "bg-zinc-900 text-zinc-300 border-zinc-700 hover:border-zinc-500"
+              }`}
+            >
+              <div>Stage 4: Event Locked</div>
+              <div className="text-[10px] font-normal opacity-80">(CLOSED)</div>
+            </button>
+          </div>
         </div>
         <div className="col-span-2">
           <span className="text-zinc-500 block text-xs uppercase tracking-wide">Services Requested</span>
@@ -275,17 +427,105 @@ export function AdminLeadDetailCard({ initialDetail }: AdminLeadDetailCardProps)
             {detail.services.length > 0 ? detail.services.join(", ") : "None recorded"}
           </span>
         </div>
-        <div className="col-span-2 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
-          <span className="text-amber-400 font-bold block text-xs uppercase tracking-wide mb-0.5">
-            📅 Requested Representative Consultation
-          </span>
-          <span className="text-amber-200 text-sm font-semibold">
+        <div className="col-span-2 p-4 bg-zinc-950/80 border border-amber-500/40 rounded-xl space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-amber-400 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5">
+              <span>📅</span> Representative Consultation & Call Hub
+            </span>
+            <span className={`px-2.5 py-0.5 text-xs font-bold rounded-full border ${
+              callStatus === "CALL_COMPLETED"
+                ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
+                : callStatus === "NO_ANSWER"
+                ? "bg-rose-500/20 text-rose-300 border-rose-500/30"
+                : "bg-amber-500/20 text-amber-300 border-amber-500/30"
+            }`}>
+              {callStatus.replace("_", " ")}
+            </span>
+          </div>
+
+          <p className="text-zinc-100 text-sm font-bold">
             {detail.preferredMeetingDate || detail.preferredMeetingTime ? (
-              `${detail.preferredMeetingDate ? new Date(detail.preferredMeetingDate).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short", year: "numeric" }) : "Any Date"}${detail.preferredMeetingTime ? ` at ${detail.preferredMeetingTime}` : ""}`
+              `Customer Slot: ${detail.preferredMeetingDate ? new Date(detail.preferredMeetingDate).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short", year: "numeric" }) : "Any Date"}${detail.preferredMeetingTime ? ` at ${detail.preferredMeetingTime}` : ""}`
             ) : (
-              "No specific consultation date/time requested"
+              "No specific date/time requested — Reach out directly via Phone / WhatsApp"
             )}
-          </span>
+          </p>
+
+          <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-zinc-800">
+            <span className="text-xs text-zinc-400 font-medium">Update Disposition:</span>
+            <button
+              type="button"
+              disabled={savingCallLog}
+              onClick={() => handleCallStatusChange("CALL_COMPLETED")}
+              className={`px-3 py-1 text-xs font-bold rounded-lg transition-all disabled:opacity-50 ${
+                callStatus === "CALL_COMPLETED"
+                  ? "bg-emerald-500 text-zinc-950 shadow-md"
+                  : "bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700"
+              }`}
+            >
+              ✓ Call Completed
+            </button>
+            <button
+              type="button"
+              disabled={savingCallLog}
+              onClick={() => handleCallStatusChange("RESCHEDULED")}
+              className={`px-3 py-1 text-xs font-bold rounded-lg transition-all disabled:opacity-50 ${
+                callStatus === "RESCHEDULED"
+                  ? "bg-amber-500 text-zinc-950 shadow-md"
+                  : "bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700"
+              }`}
+            >
+              🗓️ Rescheduled
+            </button>
+            <button
+              type="button"
+              disabled={savingCallLog}
+              onClick={() => handleCallStatusChange("NO_ANSWER")}
+              className={`px-3 py-1 text-xs font-bold rounded-lg transition-all disabled:opacity-50 ${
+                callStatus === "NO_ANSWER"
+                  ? "bg-rose-500 text-zinc-950 shadow-md"
+                  : "bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700"
+              }`}
+            >
+              ⚠️ No Answer
+            </button>
+          </div>
+
+          {lastSavedNote && (
+            <p className="text-xs text-zinc-400 italic">Last note: &ldquo;{lastSavedNote}&rdquo;</p>
+          )}
+
+          <div className="pt-2">
+            <label className="block text-xs font-medium text-zinc-400 mb-1">
+              Representative Consultation Notes
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={adminNotes}
+                onChange={(e) => {
+                  setAdminNotes(e.target.value);
+                  setNoteSaved(false);
+                }}
+                placeholder="Log call notes, customer preferences, or venue details..."
+                className="flex-1 rounded-lg bg-zinc-900 border border-zinc-800 px-3 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-amber-500/40"
+              />
+              <button
+                type="button"
+                disabled={savingCallLog || !adminNotes.trim()}
+                onClick={handleLogNote}
+                className="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-zinc-200 border border-zinc-700 disabled:opacity-50"
+              >
+                {savingCallLog ? "Saving..." : "Log Note"}
+              </button>
+            </div>
+            {callLogError && (
+              <p className="text-[11px] text-red-400 mt-1">{callLogError}</p>
+            )}
+            {noteSaved && !callLogError && (
+              <p className="text-[11px] text-emerald-400 mt-1">✓ Note recorded in lead audit history</p>
+            )}
+          </div>
         </div>
         <div className="col-span-2">
           <span className="text-zinc-500 block text-xs uppercase tracking-wide">Contact Consent</span>

@@ -430,6 +430,17 @@ export const AdminLeadPatchSchema = z.object({
       "One or more selected services are invalid."
     )
     .optional(),
+  status: z
+    .enum(["SUBMITTED", "UNDER_REVIEW", "MATCHED", "CLOSED", "INVALID"])
+    .optional(),
+});
+
+// Admin "representative call" log entry (AdminLeadDetailCard's Call Hub) --
+// recorded as an AuditLog entry, not a Lead field, since it's an append-only
+// event history, not current-state data.
+export const AdminLeadCallLogSchema = z.object({
+  callStatus: z.enum(["SCHEDULED", "CALL_COMPLETED", "RESCHEDULED", "NO_ANSWER"]),
+  note: z.string().max(2000, "Note is too long.").optional(),
 });
 
 // ============================================================

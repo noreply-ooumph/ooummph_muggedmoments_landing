@@ -84,7 +84,7 @@ export default async function AdminLeadDetailPage({
         </div>
       </div>
 
-      {detail && <AdminLeadDetailCard initialDetail={detail} />}
+      {detail && <AdminLeadDetailCard initialDetail={detail} initialTimeline={timeline} />}
 
       {/* Scheduled Customer Meetings with Vendors */}
       <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-6 my-8">

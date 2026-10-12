@@ -11,6 +11,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import { track } from "@/lib/analytics";
 import { MatchList } from "@/components/matches/MatchList";
 import { QuoteCard } from "@/components/quotes/QuoteCard";
@@ -20,6 +21,7 @@ import { BookingRequestFlow } from "@/components/booking/BookingRequestFlow";
 import { ConfirmedBookingCard } from "@/components/booking/ConfirmedBookingCard";
 import { BookingRecoveryBanner } from "@/components/booking/BookingRecoveryBanner";
 import { EditLeadDetailsForm } from "./EditLeadDetailsForm";
+import { EventJourneyStepper } from "@/components/status/EventJourneyStepper";
 import type { PublicVendorMatch, QualificationStatus } from "@/types";
 import type { PublicQuote } from "@/domain/quote/publicQuoteService";
 import type { PublicBookingRequest } from "@/domain/booking/publicBookingRequestService";
@@ -254,8 +256,18 @@ export function StatusPageClient({ publicLeadId }: { publicLeadId: string }) {
     data.status !== "CLOSED" && data.status !== "INVALID" && !hasConfirmedBooking;
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-6 md:p-8 bg-zinc-900/90 backdrop-blur-md rounded-2xl border border-zinc-800 text-zinc-100 shadow-2xl">
-      <div className="flex items-center justify-between border-b border-zinc-800 pb-5 mb-6">
+    <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-4">
+      <div className="flex items-center justify-between">
+        <Link
+          href="/my-requests"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-300 hover:text-amber-400 transition-colors bg-zinc-900/90 border border-zinc-800 rounded-xl px-4 py-2.5 hover:border-zinc-700 shadow-md"
+        >
+          ← Back to All Requests & Meetings
+        </Link>
+      </div>
+
+      <div className="w-full p-6 md:p-8 bg-zinc-900/90 backdrop-blur-md rounded-2xl border border-zinc-800 text-zinc-100 shadow-2xl">
+        <div className="flex items-center justify-between border-b border-zinc-800 pb-5 mb-6">
         <div>
           <h2 className="text-xl font-semibold text-white tracking-tight">
             {hasConfirmedBooking ? "My Booking" : "Your Event Request"}
@@ -306,25 +318,16 @@ export function StatusPageClient({ publicLeadId }: { publicLeadId: string }) {
         </div>
       </div>
 
-      {/* Representative Contact Reassurance Box */}
-      <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/30 rounded-xl p-5 mb-6">
-        <div className="flex items-start gap-3">
-          <span className="text-xl">📞</span>
-          <div>
-            <p className="text-base font-bold text-amber-300">
-              Our representative will contact you shortly
-            </p>
-            {data.preferredMeetingDate && data.preferredMeetingTime && (
-              <p className="text-xs text-amber-200/90 mt-1 font-medium">
-                Scheduled Consultation: <span className="font-bold underline">{new Date(data.preferredMeetingDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}</span> at <span className="font-bold underline">{data.preferredMeetingTime}</span>
-              </p>
-            )}
-            <p className="text-xs text-zinc-400 mt-1">
-              Our expert will reach out to guide you through matched vendors, clear queries, and secure your event booking.
-            </p>
-          </div>
-        </div>
-      </div>
+      {/* Interactive Event Journey Stepper */}
+      <EventJourneyStepper
+        status={data.status}
+        qualificationStatus={data.qualificationStatus}
+        preferredMeetingDate={data.preferredMeetingDate}
+        preferredMeetingTime={data.preferredMeetingTime}
+        hasQuotes={data.quotes.length > 0}
+        hasConfirmedBooking={hasConfirmedBooking}
+        eventDate={data.eventDate}
+      />
 
       {editingDetails && (
         <EditLeadDetailsForm
@@ -418,5 +421,6 @@ export function StatusPageClient({ publicLeadId }: { publicLeadId: string }) {
         matches={data.matches}
       />
     </div>
-  );
+  </div>
+);
 }
