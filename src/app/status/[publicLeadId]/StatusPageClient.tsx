@@ -257,13 +257,21 @@ export function StatusPageClient({ publicLeadId }: { publicLeadId: string }) {
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <Link
           href="/my-requests"
           className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-300 hover:text-amber-400 transition-colors bg-zinc-900/90 border border-zinc-800 rounded-xl px-4 py-2.5 hover:border-zinc-700 shadow-md"
         >
           ← Back to All Requests & Meetings
         </Link>
+        <a
+          href={`https://wa.me/919369356123?text=Hi%20MuggedMoments%20Admin%2C%20I%20have%20a%20query%20regarding%20my%20event%20request%20${data.publicLeadId}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-400 hover:text-emerald-300 transition-colors bg-emerald-950/80 border border-emerald-500/40 rounded-xl px-4 py-2.5 hover:border-emerald-400 shadow-md shrink-0"
+        >
+          💬 Contact Admin Support
+        </a>
       </div>
 
       <div className="w-full p-6 md:p-8 bg-zinc-900/90 backdrop-blur-md rounded-2xl border border-zinc-800 text-zinc-100 shadow-2xl">
