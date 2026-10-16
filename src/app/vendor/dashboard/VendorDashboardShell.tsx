@@ -57,7 +57,7 @@ export function VendorDashboardShell({ vendor, counts, children }: VendorDashboa
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             {/* eslint-disable-next-line @next/next/no-img-element -- local static brand asset, not an optimizable remote image */}
-            <img src="/logo-icon.png" alt="" className="h-9 w-auto shrink-0 drop-shadow-md" />
+            <img src="/logo-icon.png" alt="MuggedMoments Logo" className="h-9 w-auto shrink-0 drop-shadow-md" />
             <div className="min-w-0">
               <p className="text-sm font-bold text-white truncate tracking-tight">{vendor.name}</p>
               <p className="text-xs text-zinc-400 truncate flex items-center gap-1">

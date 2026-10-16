@@ -11,7 +11,15 @@
 export const SITE_CONFIG = {
   siteName: "MuggedMoments",
   siteTagline: "Deterministic Event Vendor Matching Platform",
-  siteUrl: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
+  siteUrl:
+    process.env.NEXT_PUBLIC_APP_URL ||
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : process.env.NODE_ENV === "production"
+      ? "https://ooummphmuggedmomentslanding.vercel.app"
+      : "http://localhost:3000"),
 
   seo: {
     title: "Plan Your Event Online | Find Venues & Vendors – MuggedMoments",

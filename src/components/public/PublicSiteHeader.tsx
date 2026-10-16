@@ -19,7 +19,7 @@ export function PublicSiteHeader() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
         <Link href="/" className="flex items-center gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element -- local static brand asset, not an optimizable remote image */}
-          <img src="/logo-icon.png" alt="" className="h-9 w-auto shrink-0" />
+          <img src="/logo-icon.png" alt="MuggedMoments Logo" className="h-9 w-auto shrink-0" />
           <span className="font-extrabold text-lg text-white tracking-tight">
             Mugged<span className="text-amber-400">Moments</span>
           </span>

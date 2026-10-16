@@ -15,7 +15,7 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
         <div className="flex items-center gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element -- local static brand asset, not an optimizable remote image */}
-          <img src="/logo-icon.png" alt="" className="h-7 w-auto shrink-0" />
+          <img src="/logo-icon.png" alt="MuggedMoments Logo" className="h-7 w-auto shrink-0" />
           <div>
             <p className="font-bold text-zinc-300">MuggedMoments Engine</p>
             <p className="text-[11px] text-zinc-500">
@@ -25,13 +25,13 @@ export function Footer() {
         </div>
 
         <div className="flex items-center gap-6 text-zinc-400">
-          <a href="#event-types" className="hover:text-amber-400">
+          <a href="/#event-types" className="hover:text-amber-400">
             Event Types
           </a>
-          <a href="#how-it-works" className="hover:text-amber-400">
+          <a href="/#how-it-works" className="hover:text-amber-400">
             How It Works
           </a>
-          <a href="#faq" className="hover:text-amber-400">
+          <a href="/#faq" className="hover:text-amber-400">
             FAQ
           </a>
           {FOOTER_CONTENT.links.map((link) => (

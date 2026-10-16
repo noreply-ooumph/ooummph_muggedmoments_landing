@@ -72,9 +72,9 @@ export function Hero({ onSelectEventType, onPrimaryCta }: HeroProps) {
 
         {/* Quick Preselection CTAs */}
         <div className="mt-10 max-w-3xl mx-auto">
-          <p className="text-xs uppercase tracking-wider font-semibold text-zinc-400 mb-4">
+          <h2 className="text-xs uppercase tracking-wider font-semibold text-zinc-400 mb-4">
             Select Your Event Type to Get Matched Instantly:
-          </p>
+          </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {EVENT_TYPES.map((evt) => (

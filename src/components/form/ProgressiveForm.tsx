@@ -764,6 +764,7 @@ export function ProgressiveForm({
                   value={values.phone ?? ""}
                   onChange={(e) => updateValues({ phone: e.target.value })}
                   error={errors.phone}
+                  helpText="🇮🇳 India (+91) — 10-digit mobile number for status tracking & verified match delivery"
                   required
                   autoComplete="tel"
                 />
@@ -1081,6 +1082,8 @@ function DynamicQuestionField({
           id={`dynamic-${question.questionKey}`}
           label={question.label}
           type="tel"
+          placeholder="+91 98765 43210"
+          helpText="🇮🇳 India (+91) — 10-digit mobile number"
           value={typeof value === "string" ? value : ""}
           onChange={(e) => onChange(e.target.value)}
           error={error}

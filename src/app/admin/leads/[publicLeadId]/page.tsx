@@ -3,6 +3,7 @@ import Link from "next/link";
 import prisma from "@/lib/db/prisma";
 import { getLeadTimeline } from "@/domain/analytics/funnelService";
 import { getLeadDetailForAdmin } from "@/services/lead/leadService";
+import { formatStandardDateTime, formatStandardDate } from "@/lib/format";
 import { AdminLeadDetailCard } from "./AdminLeadDetailCard";
 
 export const dynamic = "force-dynamic";
@@ -115,7 +116,7 @@ export default async function AdminLeadDetailPage({
                     <td className="p-3 text-zinc-400 font-mono text-xs">{m.vendor.contactPhone ?? "—"}</td>
                     <td className="p-3">
                       <div className="font-semibold text-amber-400">
-                        {new Date(m.meetingDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                        {formatStandardDate(m.meetingDate)}
                       </div>
                       <div className="text-xs text-zinc-400">{m.timeSlot}</div>
                     </td>
@@ -208,7 +209,7 @@ export default async function AdminLeadDetailPage({
           timeline.map((entry, idx) => (
             <div key={idx} className="p-4 flex items-start gap-4 text-sm">
               <span className="text-zinc-500 whitespace-nowrap font-mono text-xs">
-                {new Date(entry.timestamp).toLocaleString()}
+                {formatStandardDateTime(entry.timestamp)}
               </span>
               <span
                 className={

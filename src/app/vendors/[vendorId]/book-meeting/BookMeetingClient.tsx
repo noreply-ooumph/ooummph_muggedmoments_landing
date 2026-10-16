@@ -213,8 +213,11 @@ export function BookMeetingClient({ vendor }: BookMeetingClientProps) {
           </label>
 
           <div>
-            <label className="block text-xs text-zinc-400 mb-1">Your Full Name *</label>
+            <label htmlFor="meeting-customer-name" className="block text-xs text-zinc-400 mb-1">
+              Your Full Name *
+            </label>
             <input
+              id="meeting-customer-name"
               type="text"
               required
               value={customerName}
@@ -226,20 +229,31 @@ export function BookMeetingClient({ vendor }: BookMeetingClientProps) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs text-zinc-400 mb-1">Phone Number (used to track status) *</label>
-              <input
-                type="tel"
-                required
-                value={customerPhone}
-                onChange={(e) => setCustomerPhone(e.target.value)}
-                placeholder="+91 98765 43210"
-                className="w-full rounded-xl bg-zinc-800 border border-zinc-700 px-4 py-2.5 text-zinc-100 text-sm focus:outline-none focus:border-amber-400"
-              />
+              <label htmlFor="meeting-customer-phone" className="block text-xs text-zinc-400 mb-1">
+                Phone Number (used to track status) *
+              </label>
+              <div className="relative">
+                <input
+                  id="meeting-customer-phone"
+                  type="tel"
+                  required
+                  value={customerPhone}
+                  onChange={(e) => setCustomerPhone(e.target.value)}
+                  placeholder="+91 98765 43210"
+                  className="w-full rounded-xl bg-zinc-800 border border-zinc-700 px-4 py-2.5 text-zinc-100 text-sm focus:outline-none focus:border-amber-400"
+                />
+              </div>
+              <p className="text-[11px] text-zinc-500 mt-1">
+                10-digit Indian number (+91)
+              </p>
             </div>
 
             <div>
-              <label className="block text-xs text-zinc-400 mb-1">Email Address (optional)</label>
+              <label htmlFor="meeting-customer-email" className="block text-xs text-zinc-400 mb-1">
+                Email Address (optional)
+              </label>
               <input
+                id="meeting-customer-email"
                 type="email"
                 value={customerEmail}
                 onChange={(e) => setCustomerEmail(e.target.value)}
@@ -250,8 +264,11 @@ export function BookMeetingClient({ vendor }: BookMeetingClientProps) {
           </div>
 
           <div>
-            <label className="block text-xs text-zinc-400 mb-1">Event Requirements / Notes (optional)</label>
+            <label htmlFor="meeting-customer-notes" className="block text-xs text-zinc-400 mb-1">
+              Event Requirements / Notes (optional)
+            </label>
             <textarea
+              id="meeting-customer-notes"
               rows={3}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}

@@ -1,13 +1,14 @@
 /**
  * MuggedMoments — /my-requests client logic (Stage 20)
  *
- * Phone-only lookup, no verification step — an explicit, informed product
- * decision, not an oversight. See docs/customer-status-lookup-brief.md for the
- * tradeoff as presented to and confirmed by the operator.
+ * Customer-facing "check my status" entry point.
+ * Supports lookup by MM- reference code (BUG-002) as well as normalized phone number.
+ *
+ * Form labels and inputs properly associated via htmlFor/id (BUG-007).
+ * Country code guidance provided for phone inputs (BUG-014).
  *
  * Fetches POST /api/leads/by-phone and renders each result as a summary card
- * linking into the existing, already-built /status/[publicLeadId] page for full
- * detail (quotes, messaging, booking flow) — this page never duplicates that.
+ * linking into the existing /status/[publicLeadId] page for full detail.
  */
 
 "use client";
@@ -59,7 +60,7 @@ const MEETING_STATUS_BADGE: Record<string, { label: string; tone: StatusTone }> 
 };
 
 export function MyRequestsClient() {
-  const [phone, setPhone] = useState("");
+  const [lookupQuery, setLookupQuery] = useState("");
   const [leads, setLeads] = useState<LeadSummary[] | null>(null);
   const [meetings, setMeetings] = useState<MeetingSummary[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -72,30 +73,67 @@ export function MyRequestsClient() {
     setLeads(null);
     setMeetings(null);
 
+    const query = lookupQuery.trim();
+    const isReference = /^MM-[A-Z0-9]{8}$/i.test(query);
+
     try {
-      const [leadsRes, meetingsRes] = await Promise.all([
-        fetch("/api/leads/by-phone", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ phone }),
-        }),
-        fetch("/api/meetings/by-phone", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ phone }),
-        }),
-      ]);
+      if (isReference) {
+        // Direct reference code lookup via /api/leads/[publicLeadId]
+        const res = await fetch(`/api/leads/${encodeURIComponent(query.toUpperCase())}`);
+        if (res.status === 404) {
+          setLeads([]);
+          setMeetings([]);
+          return;
+        }
 
-      const leadsJson = await leadsRes.json();
-      const meetingsJson = await meetingsRes.json();
+        const data = await res.json();
+        if (!res.ok) {
+          setError(data?.error?.message ?? "Something went wrong.");
+          return;
+        }
 
-      if (!leadsRes.ok && !meetingsRes.ok) {
-        setError(leadsJson?.error?.message ?? "Something went wrong.");
-        return;
+        setLeads([
+          {
+            publicLeadId: data.publicLeadId,
+            eventType: data.eventType,
+            city: data.city,
+            eventDate: data.eventDate ?? null,
+            status: data.status,
+            createdAt: data.createdAt,
+            matchCount: data.matches?.length ?? 0,
+            quoteCount: data.quotes?.length ?? 0,
+          },
+        ]);
+        setMeetings([]);
+      } else {
+        // Phone lookup via both leads and meetings
+        const [leadsRes, meetingsRes] = await Promise.all([
+          fetch("/api/leads/by-phone", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ phone: query }),
+          }),
+          fetch("/api/meetings/by-phone", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ phone: query }),
+          }),
+        ]);
+
+        const leadsJson = await leadsRes.json();
+        const meetingsJson = await meetingsRes.json();
+
+        if (!leadsRes.ok && !meetingsRes.ok) {
+          setError(
+            leadsJson?.error?.message ??
+              "Please enter a valid phone number or MM- reference code."
+          );
+          return;
+        }
+
+        setLeads(leadsJson?.leads ?? []);
+        setMeetings(meetingsJson?.meetings ?? []);
       }
-
-      setLeads(leadsJson?.leads ?? []);
-      setMeetings(meetingsJson?.meetings ?? []);
     } catch {
       setError("Could not reach the server. Please try again.");
     } finally {
@@ -103,34 +141,46 @@ export function MyRequestsClient() {
     }
   }
 
-  const hasNoResults = leads !== null && meetings !== null && leads.length === 0 && meetings.length === 0;
+  const hasNoResults =
+    leads !== null && meetings !== null && leads.length === 0 && meetings.length === 0;
 
   return (
     <div className="min-h-screen bg-transparent flex flex-col font-sans">
       <PublicSiteHeader />
 
-      <main className="flex-1 flex flex-col items-center p-6">
-        <div className="w-full max-w-lg mx-auto p-8 bg-zinc-900/90 backdrop-blur-md rounded-2xl border border-zinc-800 shadow-xl mt-6">
+      <main className="flex-1 flex flex-col items-center p-4 sm:p-6">
+        <div className="w-full max-w-lg mx-auto p-6 sm:p-8 bg-zinc-900/90 backdrop-blur-md rounded-2xl border border-zinc-800 shadow-xl mt-6">
           <h1 className="text-xl sm:text-2xl font-bold text-zinc-100 mb-2">Check My Status</h1>
           <p className="text-sm text-zinc-400 mb-6">
-            Enter the phone number you used when submitting an event request or booking a vendor meeting.
+            Enter the phone number or MM- tracking reference code from your event request or meeting booking.
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs uppercase font-bold text-zinc-400 mb-1 tracking-wider">Phone number</label>
-              <input
-                type="tel"
-                required
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full rounded-xl bg-zinc-800 border border-zinc-700 px-4 py-2.5 text-zinc-100 text-sm focus:outline-none focus:border-amber-400"
-                placeholder="+91 98765 43210"
-              />
+              <label
+                htmlFor="status-lookup-input"
+                className="block text-xs uppercase font-bold text-zinc-400 mb-1.5 tracking-wider"
+              >
+                Phone Number or Reference Code
+              </label>
+              <div className="relative">
+                <input
+                  id="status-lookup-input"
+                  type="text"
+                  required
+                  value={lookupQuery}
+                  onChange={(e) => setLookupQuery(e.target.value)}
+                  className="w-full rounded-xl bg-zinc-800 border border-zinc-700 px-4 py-3 text-zinc-100 text-sm focus:outline-none focus:border-amber-400"
+                  placeholder="+91 98765 43210 or MM-XXXXXXXX"
+                />
+              </div>
+              <p className="text-[11px] text-zinc-500 mt-1.5">
+                Indian numbers (+91) or your 11-character MM-XXXXXXXX tracking reference code
+              </p>
             </div>
             <button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || !lookupQuery.trim()}
               className="w-full rounded-xl bg-amber-400 hover:bg-amber-300 text-zinc-950 font-bold py-3 transition-all shadow-md shadow-amber-400/10 disabled:opacity-50 text-sm"
             >
               {submitting ? "Looking up..." : "Check Status →"}
@@ -146,7 +196,7 @@ export function MyRequestsClient() {
 
         {hasNoResults && (
           <div className="w-full max-w-lg mx-auto mt-6 p-4 text-sm text-zinc-400 text-center bg-zinc-900/60 rounded-xl border border-zinc-800">
-            We couldn&apos;t find any event requests or scheduled meetings for that phone number.
+            We couldn&apos;t find any event requests or scheduled meetings matching that entry.
           </div>
         )}
 

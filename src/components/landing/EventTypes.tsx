@@ -19,12 +19,12 @@ export function EventTypes({ onSelectEventType }: EventTypesProps) {
     <section id="event-types" className="py-20 bg-transparent border-t border-zinc-800/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-xs uppercase font-semibold text-amber-400 tracking-wider mb-2">
+          <p className="text-xs uppercase font-semibold text-amber-400 tracking-wider mb-2">
             Tailored Experiences
-          </h2>
-          <h3 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+          </p>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
             Specialized Vendor Matching for Every Occasion
-          </h3>
+          </h2>
           <p className="text-zinc-400 text-sm mt-3">
             Our matching engine applies custom criteria for weddings, corporate galas, and private celebrations.
           </p>
@@ -40,7 +40,7 @@ export function EventTypes({ onSelectEventType }: EventTypesProps) {
                 <div className="w-12 h-12 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center text-2xl mb-4">
                   {evt.icon}
                 </div>
-                <h4 className="text-xl font-bold text-white mb-2">{evt.title}</h4>
+                <h3 className="text-xl font-bold text-white mb-2">{evt.title}</h3>
                 <p className="text-xs text-zinc-400 leading-relaxed mb-6">
                   {evt.description}
                 </p>

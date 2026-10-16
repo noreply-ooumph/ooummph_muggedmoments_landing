@@ -11,6 +11,7 @@
 import { z } from "zod";
 import { getValidEventTypeSlugs } from "@/config/event-types";
 import { getValidServiceSlugs } from "@/config/services";
+import { normalizeCityName } from "@/lib/format";
 import { ANALYTICS_EVENTS } from "@/types";
 
 // ============================================================
@@ -64,7 +65,8 @@ const CreateLeadObjectSchema = z.object({
   city: z
     .string()
     .min(1, "Please enter your city.")
-    .max(255, "City name is too long."),
+    .max(255, "City name is too long.")
+    .transform((val) => normalizeCityName(val)),
 
   // Optional locality/area within the city — informational only, not a
   // matching dimension (see Lead.locality's schema comment).
@@ -292,7 +294,8 @@ export const VendorRegisterSchema = z.object({
   city: z
     .string()
     .min(1, "Please enter your city.")
-    .max(255, "City name is too long."),
+    .max(255, "City name is too long.")
+    .transform((val) => normalizeCityName(val)),
   services: z
     .array(z.string())
     .min(1, "Please select at least one service.")
@@ -323,6 +326,7 @@ export const VendorProfilePatchSchema = z.object({
     .string()
     .min(1, "Please enter your city.")
     .max(255, "City name is too long.")
+    .transform((val) => normalizeCityName(val))
     .optional(),
   services: z
     .array(z.string())

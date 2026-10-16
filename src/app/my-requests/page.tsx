@@ -12,7 +12,8 @@ import { MyRequestsClient } from "./MyRequestsClient";
 
 export const metadata: Metadata = {
   title: "Check My Status",
-  description: "Look up your MuggedMoments event requests by phone number.",
+  description:
+    "Look up your MuggedMoments event requests and scheduled vendor meetings by phone number or MM- reference code.",
 };
 
 export default function MyRequestsPage() {

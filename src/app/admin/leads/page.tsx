@@ -1,94 +1,48 @@
 /**
  * MuggedMoments — /admin/leads
  *
- * Read-only, no interactive actions — so unlike /admin/vendors this page
- * fetches server-side directly via listLeadsForAdmin() rather than a client
- * component hitting GET /api/internal/leads. That API route still exists
- * (for any future consumer), it's just not what this page itself uses.
+ * Admin lead operations dashboard.
+ * Server component fetching listLeadsForAdmin() directly, rendering the interactive
+ * AdminLeadsTable with real-time search, status filtering, pagination, and horizontal scroll.
  *
  * Covered by middleware.ts's Basic Auth gate (/admin/:path*).
  */
 
 import Link from "next/link";
 import { listLeadsForAdmin } from "@/services/lead/leadService";
+import { AdminLeadsTable } from "./AdminLeadsTable";
 
-// This page has zero fetch() calls and reads no Request-time API (cookies/
-// headers/searchParams) — only a direct Prisma read. With no dynamic signal
-// at all, Next.js's default `dynamic = "auto"` prerenders it as fully static
-// at build time and serves that frozen snapshot forever after (verified live:
-// a real production lead existed in the DB while this page kept showing 0,
-// because the build ran before that row existed). An admin ops view must
-// always reflect the current DB state, so this route is forced dynamic.
 export const dynamic = "force-dynamic";
 
 export default async function AdminLeadsPage() {
   const leads = await listLeadsForAdmin();
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 p-8">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-white">Leads ({leads.length})</h1>
-        <div className="flex gap-4 text-sm">
-          <Link href="/admin/vendors" className="text-zinc-400 hover:text-amber-400 underline">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 p-4 sm:p-6 lg:p-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Leads Dashboard</h1>
+          <p className="text-xs text-zinc-400 mt-1">
+            Real-time deterministic event matching and customer leads database
+          </p>
+        </div>
+        <div className="flex items-center gap-4 text-sm font-medium">
+          <Link
+            href="/admin/vendors"
+            className="text-zinc-400 hover:text-amber-400 transition-colors underline"
+          >
             Vendors
           </Link>
-          <Link href="/admin/reports" className="text-zinc-400 hover:text-amber-400 underline">
+          <Link
+            href="/admin/reports"
+            className="text-zinc-400 hover:text-amber-400 transition-colors underline"
+          >
             Reports
           </Link>
         </div>
       </div>
-      <div className="overflow-x-auto rounded-xl border border-zinc-800">
-        <table className="w-full text-sm bg-zinc-950/80">
-          <thead>
-            <tr className="text-left text-zinc-400 border-b border-zinc-800">
-              <th className="px-4 py-2 font-medium">Lead ID</th>
-              <th className="px-4 py-2 font-medium">Customer</th>
-              <th className="px-4 py-2 font-medium">Phone</th>
-              <th className="px-4 py-2 font-medium">Event Type</th>
-              <th className="px-4 py-2 font-medium">City</th>
-              <th className="px-4 py-2 font-medium">Status</th>
-              <th className="px-4 py-2 font-medium">Qualification</th>
-              <th className="px-4 py-2 font-medium">Rep. Consultation</th>
-              <th className="px-4 py-2 font-medium">Created</th>
-            </tr>
-          </thead>
-          <tbody>
-            {leads.map((lead) => (
-              <tr
-                key={lead.publicLeadId}
-                className="text-zinc-100 border-b border-zinc-800/60 last:border-b-0"
-              >
-                <td className="px-4 py-2 font-mono text-xs">
-                  <Link
-                    href={`/admin/leads/${lead.publicLeadId}`}
-                    className="hover:text-amber-400 underline"
-                  >
-                    {lead.publicLeadId}
-                  </Link>
-                </td>
-                <td className="px-4 py-2">{lead.customerName}</td>
-                <td className="px-4 py-2 font-mono text-xs text-zinc-300">{lead.phone}</td>
-                <td className="px-4 py-2">{lead.eventType}</td>
-                <td className="px-4 py-2 text-zinc-400">{lead.city}</td>
-                <td className="px-4 py-2 text-zinc-400">{lead.status}</td>
-                <td className="px-4 py-2 text-zinc-400">{lead.qualificationStatus}</td>
-                <td className="px-4 py-2 text-xs">
-                  {lead.preferredMeetingDate || lead.preferredMeetingTime ? (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30">
-                      📅 {lead.preferredMeetingDate ? new Date(lead.preferredMeetingDate).toLocaleDateString("en-IN", { month: "short", day: "numeric" }) : ""}{lead.preferredMeetingTime ? ` at ${lead.preferredMeetingTime}` : ""}
-                    </span>
-                  ) : (
-                    <span className="text-zinc-500">—</span>
-                  )}
-                </td>
-                <td className="px-4 py-2 text-zinc-400">
-                  {new Date(lead.createdAt).toLocaleString()}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+
+      <AdminLeadsTable initialLeads={leads} />
     </div>
   );
 }

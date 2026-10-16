@@ -24,12 +24,12 @@ export function TrustSection() {
     <section id="reassurance" className="py-20 bg-transparent border-t border-zinc-800/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-xs uppercase font-semibold text-amber-400 tracking-wider mb-2">
+          <p className="text-xs uppercase font-semibold text-amber-400 tracking-wider mb-2">
             Why Event Hosts Trust Us
-          </h2>
-          <h3 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+          </p>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
             Designed to Protect Your Privacy & Peace of Mind
-          </h3>
+          </h2>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -39,7 +39,7 @@ export function TrustSection() {
               className="p-6 bg-zinc-900/90 backdrop-blur-md border border-zinc-800 hover:border-amber-500/40 rounded-xl shadow-xl transition-all duration-200 hover:-translate-y-1"
             >
               <div className="text-3xl mb-3">{pt.icon}</div>
-              <h4 className="text-base font-bold text-white mb-2">{pt.title}</h4>
+              <h3 className="text-base font-bold text-white mb-2">{pt.title}</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">{pt.description}</p>
             </div>
           ))}

@@ -32,12 +32,12 @@ export function FAQ({ title, items }: FAQProps) {
     <section id="faq" className="py-20 bg-transparent border-t border-zinc-800/60">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="text-xs uppercase font-semibold text-amber-400 tracking-wider mb-2">
+          <p className="text-xs uppercase font-semibold text-amber-400 tracking-wider mb-2">
             Frequently Asked Questions
-          </h2>
-          <h3 className="text-3xl font-extrabold text-white tracking-tight">
+          </p>
+          <h2 className="text-3xl font-extrabold text-white tracking-tight">
             {titleValue}
-          </h3>
+          </h2>
         </div>
 
         <div className="space-y-4">

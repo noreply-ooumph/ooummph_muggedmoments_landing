@@ -265,10 +265,11 @@ export function EditProfileClient({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">
+              <label htmlFor="edit-vendor-name" className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">
                 Business Name
               </label>
               <input
+                id="edit-vendor-name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -280,10 +281,11 @@ export function EditProfileClient({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">
+              <label htmlFor="edit-vendor-city" className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">
                 Primary City
               </label>
               <input
+                id="edit-vendor-city"
                 type="text"
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
@@ -296,12 +298,13 @@ export function EditProfileClient({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">
+            <label htmlFor="edit-vendor-starting-price" className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">
               Starting Price (INR)
             </label>
             <div className="relative max-w-xs">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 text-sm font-bold">₹</span>
               <input
+                id="edit-vendor-starting-price"
                 type="number"
                 min={0}
                 value={startingPrice}

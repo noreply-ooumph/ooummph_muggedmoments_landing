@@ -14,12 +14,12 @@ export function WhatHappensNext() {
     <section id="how-it-works" className="py-20 bg-transparent border-t border-zinc-800/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-xs uppercase font-semibold text-amber-400 tracking-wider mb-2">
+          <p className="text-xs uppercase font-semibold text-amber-400 tracking-wider mb-2">
             Stage 5 Reassurance Guarantee
-          </h2>
-          <h3 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+          </p>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
             How MuggedMoments Matching Works
-          </h3>
+          </h2>
           <p className="text-zinc-400 text-sm mt-3">
             No endless spam, no hidden commissions. Pure deterministic compatibility matching.
           </p>
@@ -35,7 +35,7 @@ export function WhatHappensNext() {
                 <div className="w-10 h-10 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold flex items-center justify-center text-sm mb-5">
                   {step.step}
                 </div>
-                <h4 className="text-lg font-bold text-white mb-2">{step.title}</h4>
+                <h3 className="text-lg font-bold text-white mb-2">{step.title}</h3>
                 <p className="text-xs text-zinc-400 leading-relaxed">
                   {step.description}
                 </p>

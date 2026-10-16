@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import prisma from "@/lib/db/prisma";
 import { getVendorTimeline } from "@/domain/vendorProfile/adminVendorService";
+import { formatCityName, formatStandardDateTime, formatStandardDate } from "@/lib/format";
 import { AdminVendorDetailActions } from "./AdminVendorDetailActions";
 
 export const dynamic = "force-dynamic";
@@ -120,7 +121,7 @@ export default async function AdminVendorDetailPage({
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
           <h1 className="text-3xl font-bold text-white mb-1">{vendor.name}</h1>
-          <p className="text-zinc-400 text-sm">{vendor.city} · Registered {new Date(vendor.createdAt).toLocaleDateString()}</p>
+          <p className="text-zinc-400 text-sm">{formatCityName(vendor.city)} · Registered {formatStandardDate(vendor.createdAt)}</p>
         </div>
         <div className="flex items-center gap-3">
           <span className={`px-3 py-1 text-xs font-semibold rounded-full border ${vendor.verificationStatus === 'VERIFIED' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/10 text-amber-400 border-amber-500/30'}`}>
@@ -237,7 +238,7 @@ export default async function AdminVendorDetailPage({
                     <div className="truncate">
                       <p className="font-medium text-zinc-200 truncate">{doc.originalFilename}</p>
                       <p className="text-xs text-zinc-500">
-                        {formatBytes(doc.fileSizeBytes)} · Uploaded {new Date(doc.createdAt).toLocaleDateString()}
+                        {formatBytes(doc.fileSizeBytes)} · Uploaded {formatStandardDate(doc.createdAt)}
                       </p>
                     </div>
                   </div>
@@ -286,7 +287,7 @@ export default async function AdminVendorDetailPage({
                       {m.customerEmail && <div className="text-zinc-500">{m.customerEmail}</div>}
                     </td>
                     <td className="p-3">
-                      <div className="font-semibold text-amber-400">{new Date(m.meetingDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</div>
+                      <div className="font-semibold text-amber-400">{formatStandardDate(m.meetingDate)}</div>
                       <div className="text-xs text-zinc-400">{m.timeSlot}</div>
                     </td>
                     <td className="p-3">
@@ -373,7 +374,7 @@ export default async function AdminVendorDetailPage({
           timeline.map((entry, idx) => (
             <div key={idx} className="p-4 flex items-start gap-4 text-sm">
               <span className="text-zinc-500 whitespace-nowrap font-mono text-xs">
-                {new Date(entry.timestamp).toLocaleString()}
+                {formatStandardDateTime(entry.timestamp)}
               </span>
               <span className="text-amber-400 font-semibold">{entry.label}</span>
             </div>

@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MuggedMoments
 
-## Getting Started
+MuggedMoments is a deterministic, high-trust event planning and vendor marketplace engineered for the Indian event services industry (weddings, birthdays, corporate celebrations, milestone gatherings).
 
-First, run the development server:
+## 📖 Master Testing & QA Documentation
+For complete architecture documentation, state machines, business invariants, and exhaustive test suites written to 30+ year principal engineering standards:
+👉 **[Read the Master QA & Testing Playbook](./QA_TESTING_PLAYBOOK.md)**
 
+---
+
+## 🛠️ Tech Stack
+- **Framework:** Next.js 16 (App Router, Server Components)
+- **UI & State:** React 19, Tailwind CSS v4, Zod
+- **Database & ORM:** PostgreSQL (Neon), Prisma 6
+- **Test Automation:** Vitest (Unit), Playwright (E2E)
+
+---
+
+## 🚀 Getting Started
+
+### 1. Prerequisites
+- Node.js 20+
+- PostgreSQL database
+
+### 2. Environment Setup
+Configure your `.env` file:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+DATABASE_URL="postgresql://user:password@localhost:5432/muggedmoments?schema=public"
+DATABASE_URL_UNPOOLED="postgresql://user:password@localhost:5432/muggedmoments?schema=public"
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Database Migration & Seeding
+```bash
+# Generate Prisma Client
+npx prisma generate
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+# Apply Migrations
+npx prisma migrate deploy
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Seed Development Catalog and Test Personas
+npx prisma db seed
+```
 
-## Learn More
+### 4. Running the Development Server
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) to view the application.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🧪 Testing Suites
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+# Run 23 Vitest Unit Suites (200+ tests)
+npm run test
 
-## Deploy on Vercel
+# Run Integration Tests with real dev server & DB
+npm run test:integration
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Run Playwright E2E User Journey Tests
+npm run test:e2e
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Run Typecheck
+npx tsc --noEmit
+```
+> ⚠️ **Note:** Avoid running `npm run build` concurrently while `npm run dev` is active in another shell to prevent `.next` cache collision.
+
