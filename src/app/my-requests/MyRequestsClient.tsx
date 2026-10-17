@@ -13,10 +13,11 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { PublicSiteHeader } from "@/components/public/PublicSiteHeader";
 import { StatusBadge, type StatusTone } from "@/components/ui/StatusBadge";
+import { formatCityName, formatStandardDate } from "@/lib/format";
 
 interface LeadSummary {
   publicLeadId: string;
@@ -66,20 +67,41 @@ export function MyRequestsClient() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  // Read URL query params on mount for direct tracking links (?ref=, ?code=, ?phone=)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const initialParam =
+        params.get("ref") ||
+        params.get("code") ||
+        params.get("reference") ||
+        params.get("phone") ||
+        params.get("query");
+      if (initialParam) {
+        setLookupQuery(initialParam);
+        void executeLookup(initialParam);
+      }
+    }
+  }, []);
+
+  async function executeLookup(rawInput: string) {
+    const cleanQuery = rawInput.trim();
+    if (!cleanQuery) return;
+
     setError(null);
     setSubmitting(true);
     setLeads(null);
     setMeetings(null);
 
-    const query = lookupQuery.trim();
-    const isReference = /^MM-[A-Z0-9]{8}$/i.test(query);
+    // Normalizes "MM-USGG9R1H", "mm-usgg9r1h", or raw 8-character "USGG9R1H"
+    const stripped = cleanQuery.replace(/\s+/g, "");
+    const refMatch = stripped.match(/^(?:MM-)?([A-Za-z0-9]{8})$/i);
+    const referenceCode = refMatch ? `MM-${refMatch[1].toUpperCase()}` : null;
 
     try {
-      if (isReference) {
+      if (referenceCode) {
         // Direct reference code lookup via /api/leads/[publicLeadId]
-        const res = await fetch(`/api/leads/${encodeURIComponent(query.toUpperCase())}`);
+        const res = await fetch(`/api/leads/${encodeURIComponent(referenceCode)}`);
         if (res.status === 404) {
           setLeads([]);
           setMeetings([]);
@@ -111,12 +133,12 @@ export function MyRequestsClient() {
           fetch("/api/leads/by-phone", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ phone: query }),
+            body: JSON.stringify({ phone: cleanQuery }),
           }),
           fetch("/api/meetings/by-phone", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ phone: query }),
+            body: JSON.stringify({ phone: cleanQuery }),
           }),
         ]);
 
@@ -139,6 +161,11 @@ export function MyRequestsClient() {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    await executeLookup(lookupQuery);
   }
 
   const hasNoResults =
@@ -217,7 +244,7 @@ export function MyRequestsClient() {
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <h3 className="font-bold text-zinc-100 text-base">{meeting.vendorName}</h3>
-                        <p className="text-xs text-zinc-400">{meeting.vendorCity}</p>
+                        <p className="text-xs text-zinc-400">{formatCityName(meeting.vendorCity)}</p>
                       </div>
                       <StatusBadge label={badge.label} tone={badge.tone} />
                     </div>
@@ -226,12 +253,7 @@ export function MyRequestsClient() {
                       <div className="flex justify-between">
                         <span className="text-zinc-500">Date & Time:</span>
                         <span className="font-semibold text-amber-400">
-                          {new Date(meeting.meetingDate).toLocaleDateString("en-US", {
-                            weekday: "short",
-                            month: "short",
-                            day: "numeric",
-                          })}{" "}
-                          at {meeting.timeSlot}
+                          {formatStandardDate(meeting.meetingDate)} at {meeting.timeSlot}
                         </span>
                       </div>
                       <div className="flex justify-between">
@@ -279,13 +301,13 @@ export function MyRequestsClient() {
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <p className="font-bold text-zinc-100 text-base">{lead.eventType}</p>
-                        <p className="text-xs text-zinc-400">{lead.city}</p>
+                        <p className="text-xs text-zinc-400">{formatCityName(lead.city)}</p>
                       </div>
                       <StatusBadge label={status.label} tone={status.tone} />
                     </div>
                     <p className="text-xs text-zinc-400">
                       {lead.eventDate
-                        ? new Date(lead.eventDate).toLocaleDateString()
+                        ? formatStandardDate(lead.eventDate)
                         : "Date not set"}
                       {" · "}
                       {lead.matchCount} vendor{lead.matchCount === 1 ? "" : "s"} matched

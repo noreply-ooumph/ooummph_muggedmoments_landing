@@ -413,6 +413,7 @@ export const AdminLeadPatchSchema = z.object({
     .string()
     .min(1, "Please enter a city.")
     .max(255, "City name is too long.")
+    .transform((val) => normalizeCityName(val))
     .optional(),
   locality: z.string().max(255, "Locality name is too long.").optional(),
   eventDate: z

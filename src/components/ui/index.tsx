@@ -100,11 +100,13 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       }
     };
     if (isOpen) {
+      document.documentElement.style.overflow = "hidden";
       document.body.style.overflow = "hidden";
       window.addEventListener("keydown", handleKeyDown);
     }
     return () => {
-      document.body.style.overflow = "unset";
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen, onClose]);
@@ -119,9 +121,9 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
         onClick={onClose}
       />
 
-      {/* Modal Dialog */}
+      {/* Modal Dialog: single coherent scroll container (BUG-011) */}
       <div
-        className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-zinc-900 border border-zinc-800 rounded-2xl p-6 sm:p-8 shadow-2xl z-10 animate-in fade-in zoom-in-95 duration-200"
+        className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto overscroll-contain bg-zinc-900 border border-zinc-800 rounded-2xl p-6 sm:p-8 shadow-2xl z-10 animate-in fade-in zoom-in-95 duration-200"
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"

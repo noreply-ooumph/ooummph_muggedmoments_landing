@@ -16,6 +16,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Input, Button, Modal } from "@/components/ui";
+import { formatCityName, formatStandardDate, formatConsultationSlot } from "@/lib/format";
 import type { AdminLeadDetail } from "@/services/lead/leadService";
 import type { TimelineEntry } from "@/domain/analytics/funnelService";
 
@@ -334,7 +335,7 @@ export function AdminLeadDetailCard({ initialDetail, initialTimeline }: AdminLea
         </div>
         <div>
           <span className="text-zinc-500 block text-xs uppercase tracking-wide">City</span>
-          <span className="text-zinc-100">{detail.city}</span>
+          <span className="text-zinc-100">{formatCityName(detail.city)}</span>
         </div>
         <div>
           <span className="text-zinc-500 block text-xs uppercase tracking-wide">Locality / Area</span>
@@ -343,7 +344,7 @@ export function AdminLeadDetailCard({ initialDetail, initialTimeline }: AdminLea
         <div>
           <span className="text-zinc-500 block text-xs uppercase tracking-wide">Event Date</span>
           <span className="text-zinc-100">
-            {detail.eventDate ? new Date(detail.eventDate).toLocaleDateString() : "Not set"}
+            {detail.eventDate ? formatStandardDate(detail.eventDate) : "Not set"}
           </span>
         </div>
         <div>
@@ -445,7 +446,7 @@ export function AdminLeadDetailCard({ initialDetail, initialTimeline }: AdminLea
 
           <p className="text-zinc-100 text-sm font-bold">
             {detail.preferredMeetingDate || detail.preferredMeetingTime ? (
-              `Customer Slot: ${detail.preferredMeetingDate ? new Date(detail.preferredMeetingDate).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short", year: "numeric" }) : "Any Date"}${detail.preferredMeetingTime ? ` at ${detail.preferredMeetingTime}` : ""}`
+              `Customer Slot: ${formatConsultationSlot(detail.preferredMeetingDate, detail.preferredMeetingTime)}`
             ) : (
               "No specific date/time requested — Reach out directly via Phone / WhatsApp"
             )}

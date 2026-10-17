@@ -63,6 +63,7 @@ import { toPublicBookingRequest, type PublicBookingRequest } from "@/domain/book
 import { toPublicBooking, type PublicBooking } from "@/domain/booking/publicBookingService";
 import { isBookingRequestExpired } from "@/domain/booking/bookingRequestService";
 import { normalizePhoneLast10 } from "@/lib/phone";
+import { formatCityName } from "@/lib/format";
 import type {
   CreateLeadInput,
   LeadResponse,
@@ -1261,7 +1262,7 @@ export async function listLeadsForAdmin(): Promise<
     customerName: lead.customerName,
     phone: lead.phone,
     eventType: formatEventTypeDisplay(lead.eventType.name, lead.customEventTypeName),
-    city: lead.city,
+    city: formatCityName(lead.city),
     status: lead.status,
     qualificationStatus: lead.qualification?.status ?? "CAPTURED",
     preferredMeetingDate: lead.preferredMeetingDate ? lead.preferredMeetingDate.toISOString() : null,
@@ -1323,7 +1324,7 @@ export async function getLeadDetailForAdmin(
     customerName: lead.customerName,
     phone: lead.phone,
     eventType: formatEventTypeDisplay(lead.eventType.name, lead.customEventTypeName),
-    city: lead.city,
+    city: formatCityName(lead.city),
     locality: lead.locality,
     eventDate: lead.eventDate ? lead.eventDate.toISOString() : null,
     guestCount: lead.guestCount,

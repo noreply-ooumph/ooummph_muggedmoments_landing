@@ -30,16 +30,16 @@ export function VendorHeader() {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-zinc-800/80 bg-zinc-950/90 backdrop-blur-lg">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
-        <Link href="/join-as-vendor" className="flex items-center gap-2 sm:gap-3 shrink-0 min-w-0">
+      <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-1.5 sm:gap-2">
+        <Link href="/join-as-vendor" className="flex items-center gap-1.5 sm:gap-3 shrink min-w-0">
           {/* eslint-disable-next-line @next/next/no-img-element -- local static brand asset */}
           <img
             src="/logo-icon.png"
             alt="MuggedMoments Logo"
-            className="h-7 sm:h-9 w-auto shrink-0"
+            className="h-6 sm:h-9 w-auto shrink-0"
           />
-          <div className="min-w-0">
-            <span className="font-extrabold text-base sm:text-lg text-white tracking-tight">
+          <div className="min-w-0 truncate">
+            <span className="font-extrabold text-sm sm:text-base md:text-lg text-white tracking-tight">
               Mugged<span className="text-amber-400">Moments</span>
             </span>
             <span className="hidden sm:inline-block ml-2 text-[10px] uppercase font-semibold px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-700">
@@ -64,12 +64,13 @@ export function VendorHeader() {
           </Link>
         </nav>
 
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           <Link
             href="/vendor"
-            className="inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-amber-500 bg-amber-400 text-zinc-950 hover:bg-amber-300 shadow-md shadow-amber-400/10 px-3 sm:px-4 py-1.5 sm:py-2 text-xs whitespace-nowrap"
+            className="inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-amber-500 bg-amber-400 text-zinc-950 hover:bg-amber-300 shadow-md shadow-amber-400/10 px-2 py-1.5 sm:px-4 sm:py-2 text-[11px] sm:text-xs whitespace-nowrap"
           >
-            {SELLER_LANDING_CONTENT.primaryCta}
+            <span className="hidden min-[360px]:inline">{SELLER_LANDING_CONTENT.primaryCta}</span>
+            <span className="min-[360px]:hidden">Join Free →</span>
           </Link>
 
           {/* Mobile Menu Toggle Button */}
@@ -79,7 +80,7 @@ export function VendorHeader() {
             aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
             aria-controls="vendor-mobile-nav"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden inline-flex items-center justify-center p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-850 focus:outline-none focus:ring-2 focus:ring-amber-400 transition-colors"
+            className="md:hidden inline-flex items-center justify-center p-1.5 sm:p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-850 focus:outline-none focus:ring-2 focus:ring-amber-400 transition-colors"
           >
             {mobileMenuOpen ? (
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

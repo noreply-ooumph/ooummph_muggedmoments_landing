@@ -16,7 +16,7 @@ import {
   formatConsultationSlot,
 } from "@/lib/format";
 import { SITE_CONFIG } from "@/config/content";
-import { CreateLeadSchema, VendorRegisterSchema } from "@/lib/validation/schemas";
+import { CreateLeadSchema, VendorRegisterSchema, AdminLeadPatchSchema } from "@/lib/validation/schemas";
 
 describe("QA Fixes: Formatting & Ingestion (BUG-009, BUG-010)", () => {
   describe("normalizeCityName", () => {
@@ -112,6 +112,44 @@ describe("QA Fixes: Formatting & Ingestion (BUG-009, BUG-010)", () => {
       if (result.success) {
         expect(result.data.city).toBe("New Delhi");
       }
+    });
+
+    it("transforms city in AdminLeadPatchSchema to Title Case automatically", () => {
+      const result = AdminLeadPatchSchema.safeParse({
+        city: "kolkata",
+      });
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.city).toBe("Kolkata");
+      }
+    });
+  });
+
+  describe("Reference Code Detection & Normalization (BUG-002)", () => {
+    function parseReferenceCode(input: string): string | null {
+      const stripped = input.trim().replace(/\s+/g, "");
+      const match = stripped.match(/^(?:MM-)?([A-Za-z0-9]{8})$/i);
+      return match ? `MM-${match[1].toUpperCase()}` : null;
+    }
+
+    it("parses standard MM- reference codes correctly", () => {
+      expect(parseReferenceCode("MM-USGG9R1H")).toBe("MM-USGG9R1H");
+      expect(parseReferenceCode("mm-usgg9r1h")).toBe("MM-USGG9R1H");
+    });
+
+    it("parses raw 8-character codes and prepends MM- prefix", () => {
+      expect(parseReferenceCode("USGG9R1H")).toBe("MM-USGG9R1H");
+      expect(parseReferenceCode("usgg9r1h")).toBe("MM-USGG9R1H");
+    });
+
+    it("handles extra spaces inside or around reference code", () => {
+      expect(parseReferenceCode("  MM - USGG9R1H  ")).toBe("MM-USGG9R1H");
+    });
+
+    it("returns null for non-reference phone inputs", () => {
+      expect(parseReferenceCode("+91 98765 43210")).toBeNull();
+      expect(parseReferenceCode("9876543210")).toBeNull();
     });
   });
 

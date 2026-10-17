@@ -18,7 +18,7 @@ export default async function AdminLeadsPage() {
   const leads = await listLeadsForAdmin();
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen max-w-full overflow-x-hidden bg-zinc-950 text-zinc-100 p-3 sm:p-6 lg:p-8">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-white tracking-tight">Leads Dashboard</h1>

@@ -31,16 +31,21 @@ export const metadata: Metadata = {
 };
 
 // Minimal, honest structured data only — Organization/WebSite, using facts
-// already true in this codebase (site name, site URL). No logo, no social
-// profile URLs, no phone number: none of those are confirmed real yet, and
-// per the "never fabricate a fact" rule that's applied everywhere else in
-// this build, an invented value here is worse than an absent field.
+// already true in this codebase (site name, site URL). Uses production canonical URL
+// to ensure schema validators never encounter localhost (BUG-001).
+function getCanonicalStructuredDataUrl(): string {
+  if (SITE_CONFIG.siteUrl && !SITE_CONFIG.siteUrl.includes("localhost")) {
+    return SITE_CONFIG.siteUrl;
+  }
+  return "https://ooummphmuggedmomentslanding.vercel.app";
+}
+
 function organizationJsonLd() {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: SITE_CONFIG.siteName,
-    url: SITE_CONFIG.siteUrl,
+    url: getCanonicalStructuredDataUrl(),
   };
 }
 
@@ -49,7 +54,7 @@ function websiteJsonLd() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: SITE_CONFIG.siteName,
-    url: SITE_CONFIG.siteUrl,
+    url: getCanonicalStructuredDataUrl(),
   };
 }
 

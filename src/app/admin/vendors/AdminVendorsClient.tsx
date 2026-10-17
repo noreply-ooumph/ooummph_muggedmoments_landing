@@ -14,6 +14,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button, Modal } from "@/components/ui";
+import { formatCityName } from "@/lib/format";
 
 interface AdminVendor {
   id: string;
@@ -119,7 +120,7 @@ export function AdminVendorsClient() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 p-8">
+    <div className="min-h-screen max-w-full overflow-x-hidden bg-zinc-950 text-zinc-100 p-4 sm:p-6 lg:p-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-white">Vendors ({vendors.length})</h1>
         <div className="flex gap-4 text-sm">
@@ -131,8 +132,8 @@ export function AdminVendorsClient() {
           </Link>
         </div>
       </div>
-      <div className="overflow-x-auto rounded-xl border border-zinc-800">
-        <table className="w-full text-sm bg-zinc-950/80">
+      <div className="w-full max-w-full overflow-x-auto rounded-xl border border-zinc-800">
+        <table className="min-w-[640px] w-full text-sm bg-zinc-950/80">
           <thead>
             <tr className="text-left text-zinc-400 border-b border-zinc-800">
               <th className="px-4 py-2 font-medium">Name</th>
@@ -156,7 +157,7 @@ export function AdminVendorsClient() {
                     {vendor.name}
                   </Link>
                 </td>
-                <td className="px-4 py-2 text-zinc-400">{vendor.city}</td>
+                <td className="px-4 py-2 text-zinc-400">{formatCityName(vendor.city)}</td>
                 <td className="px-4 py-2 text-zinc-400">{vendor.contactPhone ?? "—"}</td>
                 <td className="px-4 py-2 text-zinc-400">{vendor.verificationStatus}</td>
                 <td className="px-4 py-2">

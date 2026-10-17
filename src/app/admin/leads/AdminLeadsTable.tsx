@@ -160,7 +160,7 @@ export function AdminLeadsTable({ initialLeads }: AdminLeadsTableProps) {
       </div>
 
       {/* Table Container with unclipped horizontal scroll container (BUG-005) */}
-      <div className="overflow-x-auto rounded-xl border border-zinc-800 bg-zinc-950/80 shadow-2xl">
+      <div className="w-full max-w-full overflow-x-auto rounded-xl border border-zinc-800 bg-zinc-950/80 shadow-2xl">
         <table className="min-w-[960px] w-full text-sm">
           <thead>
             <tr className="text-left text-zinc-400 border-b border-zinc-800 bg-zinc-900/50">
@@ -249,8 +249,9 @@ export function AdminLeadsTable({ initialLeads }: AdminLeadsTableProps) {
       {/* Pagination Controls (BUG-012) */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 text-xs text-zinc-400">
         <div className="flex items-center gap-2">
-          <span>Rows per page:</span>
+          <label htmlFor="admin-page-size" className="text-zinc-400">Rows per page:</label>
           <select
+            id="admin-page-size"
             value={pageSize}
             onChange={(e) => {
               setPageSize(Number(e.target.value));

@@ -25,7 +25,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
   }
 
-  // BUG-002: Check if client provided an MM- tracking reference code
+  // BUG-002: Check if client provided an MM- tracking reference code or raw 8-character code
   const candidate =
     typeof body === "object" && body !== null
       ? (body as Record<string, unknown>).reference ||
@@ -33,14 +33,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         (body as Record<string, unknown>).phone
       : null;
 
-  if (typeof candidate === "string" && /^MM-[A-Za-z0-9]{8}$/i.test(candidate.trim())) {
-    try {
-      const publicLeadId = candidate.trim().toUpperCase();
-      const lead = await getLeadByPublicId(publicLeadId);
+  if (typeof candidate === "string") {
+    const raw = candidate.trim().replace(/\s+/g, "");
+    const refMatch = raw.match(/^(?:MM-)?([A-Za-z0-9]{8})$/i);
+    if (refMatch) {
+      try {
+        const publicLeadId = `MM-${refMatch[1].toUpperCase()}`;
+        const lead = await getLeadByPublicId(publicLeadId);
 
-      if (!lead) {
-        return NextResponse.json({ leads: [] }, { status: 200 });
-      }
+        if (!lead) {
+          return NextResponse.json({ leads: [] }, { status: 200 });
+        }
 
       return NextResponse.json(
         {
@@ -67,6 +70,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json(errBody, { status });
     }
   }
+}
 
   const parseResult = LeadPhoneLookupSchema.safeParse(body);
   if (!parseResult.success) {
